@@ -47,9 +47,10 @@ function verifyGitHubSignature(req, res, next) {
 
 app.get("*", (req, res) => {
   const file_path = `${__dirname}/public/index.html`;
+  console.log(fs.existsSync(file_path));
   if (fs.existsSync(file_path)) {
     res.sendFile(file_path);
-  } else res.status(404).send(`<h3>file not found.</h3><p style='position: absolute;bottom: 0;right: 0;margin-right: 3%'> by [Happn]. 2023 </p>`);
+  } else res.status(404).send(`<div style="height:100%;width:100%;display: flex;"><h1 style='margin:auto;'>404 [File not found]</h1></div><p style='position: absolute;bottom: 0;right: 0;margin-right: 3%'> by [Happn]. 2023 </p>`);
 });
 ////////////////////////////////////////////////
 module.exports = app;
