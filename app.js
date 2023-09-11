@@ -17,6 +17,7 @@ require('./session-config')(app);
 app.post('/webhook', (req, res) => {
   // 拉取最新的代码
   try {
+    console.log('Github webhook trigger');
     exec('git pull', { cwd: __dirname }, (error, stdout, stderr) => {
       if (error) {
         log_error(`exec error: ${error}`);
