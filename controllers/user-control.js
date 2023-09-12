@@ -3,12 +3,13 @@ const crypto = require('crypto');
 const uc = express.Router();
 const str_filter = require('../str_filter');
 const { verifyIdToken } = require("../firebase_");
+const { log_error, log } = require('../logs_.js');
 ///user/////////////////////////////////////////////////
 uc.get("/login_available", async (req, res) => {
   try {
     res.json({ payload: true });
   } catch (error) {
-    console.error(error);
+    log_error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -23,11 +24,11 @@ uc.post('/login_by_third_party', async (req, res) => {
       const { user_id, email, name } = userInfo;
       let newUserJson = {
         user_id: user_id,
-        password: user_password_hash(generateUsername()),
+        password: user_password_hash(generateUsername() + current_datetime()),
         availability: true,
         current_session: req.sessionID,
         username: name,
-        last_seen: new Date().toUTCString(),
+        last_seen: current_datetime(),
         ip_address: req.socket.remoteAddress,
         email,
         third_party_login: 1
@@ -53,18 +54,18 @@ uc.post('/login_by_third_party', async (req, res) => {
       } else throw new Error("register an new third party user failed.");
     } else throw new Error("user info invalid");
   } catch (error) {
-    console.error(error);
+    log_error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-uc.get('/logout', async (req, res) => {
+uc.get('/logout', verifyUserLogin, async (req, res) => {
   try {
     req.session.userInfo = {};
     req.session.save();
-    res.json({ data: req.trans("Successed logout.") });
+    res.json({ data: "Successed logout." });
   } catch (error) {
-    console.error(error);
+    log_error(error);
     res.status(500).json({ "error": "error" });
   }
 });
@@ -74,10 +75,10 @@ function verifyUserLogin(req, res, next) {
     // console.log("in verify user", req.session.userInfo)
     if (req.session.userInfo === undefined) {
       //new session, no login also
-      throw new Error(req.trans("You need to login first."));
+      throw new Error("You need to login first.");
     } else if (req.session.userInfo.userId === undefined) {
       //was login, but logout already
-      throw new Error(req.trans("You need to login first."));
+      throw new Error("You need to login first.");
     } else if (req.session.userInfo.userId) {
       //login user
       //if success
@@ -101,6 +102,7 @@ function generateUsername() {
 const user_password_hash = (password) => {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
+const current_datetime = () => new Date().toUTCString();
 ///////////////////////////////////////////////////////
 
-module.exports = uc;
+module.exports = { uc, verifyUserLogin };

@@ -13,7 +13,7 @@ require('./session-config')(app);
 require('./controllers/load-language').getTranslation(app);
 //control routing entry////////////////////////////////////////////
 const github = require('./controllers/github-webhook.js');
-const user = require('./controllers/user-control.js');
+const user = require('./controllers/user-control.js').uc;
 //common routing//////////////////////////////////////////////////
 app.use('/webhook', github);
 app.use('/user', user);

@@ -1,5 +1,5 @@
 const API = "https://localhost:8001";
-console.log(API)
+console.log(API);
 let default_fetch_options = {
   "Access-Control-Allow-Origin": "*",
   "Content-Type": "application/json",
@@ -46,9 +46,11 @@ function fetch_post(url, fetchOptions, callback, method = 'POST') {
     });
 }
 ///////////////////////////////////////////////
-const login = () => {
+const logout = (callback) => {
   //
-
+  fetch_get(`${API}/user/logout`, (data) => {
+    callback(data);
+  })
 }
 const checkLoginFunction = (callback) => {
   fetch(`${API}/user/login_available`)
@@ -70,5 +72,6 @@ function userLoginWithThirdParty(idToken, callback) {
 ///////////////////////////////////////////////
 export {
   userLoginWithThirdParty,
-  checkLoginFunction
+  checkLoginFunction,
+  logout
 }

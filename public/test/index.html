@@ -4,22 +4,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <script type="module">
-    import { checkLoginFunction, userLoginWithThirdParty } from './fetch_.js';
+  <title>Happn backend function demo</title>
+  <script type="module" defer>
+    import {
+      checkLoginFunction,
+      userLoginWithThirdParty,
+      logout
+    } from './fetch_.js';
     import { authByGoogle } from './auth.js';
     ///entry
     checkLoginFunction((res) => {
-      console.log(res)
+      console.log(res);
     })
-    authByGoogle(idToken => {
-      console.log("token from google", idToken);
-      userLoginWithThirdParty(idToken, (res) => {
-        console.log("result from backend", res);
-      })
-    })
-  </script>
 
+    ///update buttons with event
+    const buttons = document.querySelectorAll("button");
+    for (let btn of buttons) {
+      btn.addEventListener("click", evt => {
+        handleButtonClick(evt.target.name);
+      })
+    }
+    const handleButtonClick = (name) => {
+      switch (name) {
+        case "login by google":
+          //function start
+          authByGoogle(idToken => {
+            console.log("token from google", idToken);
+            userLoginWithThirdParty(idToken, (res) => {
+              console.log("result from backend", res);
+            })
+          });
+          //function end
+          break;
+        case "logout":
+          logout(res => {
+            console.log(res);
+          })
+          break;
+      }
+    }
+    ///
+  </script>
+  <style>
+    ol>li {
+      margin: 3px;
+      padding: 3px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
@@ -27,6 +62,13 @@
     <h1>hello world, Happn</h1>
     <p>by default access: <a href="https://127.0.0.1:8001/test/index.html">https://127.0.0.1:8001/test/index.html</a>
     </p>
+    <div>
+      <h3>test functions</h3>
+      <ol>
+        <li><button name="login by google">login by google</button></li>
+        <li><button name="logout">logout</button></li>
+      </ol>
+    </div>
   </div>
 </body>
 
