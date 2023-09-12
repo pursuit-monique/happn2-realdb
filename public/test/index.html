@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script type="module">
+    import { checkLoginFunction, userLoginWithThirdParty } from './fetch_.js';
+    import { authByGoogle } from './auth.js';
+    ///entry
+    checkLoginFunction((res) => {
+      console.log(res)
+    })
+    authByGoogle(idToken => {
+      console.log("token from google", idToken);
+      userLoginWithThirdParty(idToken, (res) => {
+        console.log("result from backend", res);
+      })
+    })
+  </script>
+
+</head>
+
+<body>
+  <div>
+    <h1>hello world, Happn</h1>
+    <p>by default access: <a href="https://127.0.0.1:8001/test/index.html">https://127.0.0.1:8001/test/index.html</a>
+    </p>
+  </div>
+</body>
+
+</html>

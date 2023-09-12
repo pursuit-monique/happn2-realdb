@@ -7,7 +7,10 @@ const { log_error, log } = require('./logs_.js');
 /////////////////////////////////////////////////
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
+app.use(express.static("./public"));
+//middle ware/////////
 require('./session-config')(app);
+require('./controllers/load-language').getTranslation(app);
 //control routing entry////////////////////////////////////////////
 const github = require('./controllers/github-webhook.js');
 const user = require('./controllers/user-control.js');
