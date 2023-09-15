@@ -4,6 +4,7 @@ const uc = express.Router();
 const str_filter = require('../str_filter');
 const { verifyIdToken } = require("../firebase_");
 const { log_error, log } = require('../logs_.js');
+const { create_third_party_user } = require('../queries/user-control');
 ///user/////////////////////////////////////////////////
 uc.get("/login_available", async (req, res) => {
   try {
@@ -34,14 +35,14 @@ uc.post('/login_by_third_party', async (req, res) => {
         third_party_login: 1
       }
       const ret = await create_third_party_user(newUserJson);
-
+      console.log(ret);
       if (ret !== false) {
         if (ret.availability) {
           //success
           const templete = login_returning_template();
           for (let x in templete) if (ret[x]) templete[x] = ret[x];
 
-          res.json({ data: templete });
+          res.json({ payload: templete });
           //add user id back to session
           templete['userId'] = ret['user_id'];
           req.session.userInfo = templete;
@@ -63,7 +64,7 @@ uc.get('/logout', verifyUserLogin, async (req, res) => {
   try {
     req.session.userInfo = {};
     req.session.save();
-    res.json({ data: "Successed logout." });
+    res.json({ payload: "Successed logout." });
   } catch (error) {
     log_error(error);
     res.status(500).json({ "error": "error" });
