@@ -9,6 +9,9 @@ github.post('/', (req, res) => {
   // 拉取最新的代码
   try {
     console.log('Github webhook trigger', req.body);
+    /* req.body example 
+      Github webhook trigger { messages: [ { role: 'user', content: 'hello' } ], userID: ' ' }
+    */
     exec('git pull', { cwd: __dirname }, (error, stdout, stderr) => {
       if (error) {
         log_error(`exec error: ${error}`);

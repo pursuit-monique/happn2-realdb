@@ -17,8 +17,8 @@ function fetch_get(url, callback) {
   }
   fetch(url, body)
     .then((response) => response.json())
-    .then((data) => {
-      callback(data);
+    .then((res) => {
+      callback(res);
     })
     .catch(error => {
       error_handle(error);
@@ -37,8 +37,8 @@ function fetch_post(url, fetchOptions, callback, method = 'POST') {
   fetchOptions.credentials = "include";
   fetch(url, fetchOptions)
     .then((response) => response.json())
-    .then((data) => {
-      callback(data);
+    .then((res) => {
+      callback(res);
     })
     .catch(error => {
       error_handle(error);
@@ -48,15 +48,15 @@ function fetch_post(url, fetchOptions, callback, method = 'POST') {
 ///////////////////////////////////////////////
 const logout = (callback) => {
   //
-  fetch_get(`${API}/user/logout`, (data) => {
-    callback(data);
+  fetch_get(`${API}/user/logout`, (res) => {
+    callback(res);
   })
 }
 const checkLoginFunction = (callback) => {
   fetch(`${API}/user/login_available`)
     .then((response) => response.json())
-    .then((data) => {
-      callback(data);
+    .then((res) => {
+      callback(res);
     })
     .catch(error => {
       error_handle(error);
@@ -65,8 +65,8 @@ const checkLoginFunction = (callback) => {
 }
 function userLoginWithThirdParty(idToken, callback) {
   const body = { body: JSON.stringify({ idToken }) };
-  fetch_post(`${API}/user/login_by_third_party`, body, (data) => {
-    callback(data);
+  fetch_post(`${API}/user/login_by_third_party`, body, (res) => {
+    callback(res);
   });
 }
 ///////////////////////////////////////////////
