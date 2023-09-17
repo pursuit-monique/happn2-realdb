@@ -1,0 +1,60 @@
+CREATE TABLE session (
+    sid character varying PRIMARY KEY,
+    sess json NOT NULL,
+    expire timestamp(6) without time zone NOT NULL
+);
+CREATE TABLE "user" (
+    id SERIAL PRIMARY KEY,
+    current_session character varying,
+    user_id text UNIQUE,
+    username text,
+    password character varying,
+    last_seen timestamp without time zone,
+    profile_setting json NOT NULL DEFAULT '{}'::json,
+    temp_passcode text DEFAULT ''::text,
+    ip_address text,
+    email text,
+    third_party_login integer DEFAULT 0,
+    status integer DEFAULT 1
+);
+
+CREATE TABLE happen (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name text,
+    description text,
+    extra_info json DEFAULT '{}'::json,
+    status integer DEFAULT 1,
+    create_time timestamp without time zone
+);
+
+CREATE TABLE happen_detail (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    happen_id integer,
+    lat double precision NOT NULL,
+    lng double precision NOT NULL,
+    extra_info json DEFAULT '{}'::json,
+    creator integer,
+    status integer DEFAULT 1,
+    start_time timestamp without time zone NOT NULL,
+    end_time timestamp without time zone NOT NULL,
+    price double precision,
+    images text[]
+);
+
+CREATE TABLE hashtag (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name text,
+    type text,
+    description text,
+    status integer DEFAULT 1
+);
+CREATE TABLE hashtag_to_happn (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    hashtag_id integer,
+    happen_detail_id integer
+);
+CREATE TABLE hashtag_to_user (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    hashtag_id integer,
+    user_id integer
+);

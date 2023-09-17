@@ -26,7 +26,7 @@ uc.post('/login_by_third_party', async (req, res) => {
       let newUserJson = {
         user_id: user_id,
         password: user_password_hash(generateUsername() + current_datetime()),
-        availability: true,
+        status: 1,
         current_session: req.sessionID,
         username: name,
         last_seen: current_datetime(),
@@ -35,9 +35,9 @@ uc.post('/login_by_third_party', async (req, res) => {
         third_party_login: 1
       }
       const ret = await create_third_party_user(newUserJson);
-      console.log(ret);
+      console.log("ret", ret);
       if (ret !== false) {
-        if (ret.availability) {
+        if (ret.status === 1) {
           //success
           const templete = login_returning_template();
           for (let x in templete) if (ret[x]) templete[x] = ret[x];
@@ -90,7 +90,7 @@ function verifyUserLogin(req, res, next) {
   }
 }
 function login_returning_template() {
-  return { "username": "text", "last_seen": "text", "credit": "text", "profile_setting": "json" };
+  return { "username": "text", "last_seen": "text", "status": "text", "profile_setting": "json" };
 }
 function generateUsername() {
   var adjectives = ['happy', 'sad', 'funny', 'serious', 'clever', 'smart', 'kind', 'brave', 'shiny', 'silly', 'energetic', 'graceful', 'playful', 'witty', 'gentle', 'curious', 'charming', 'vibrant', 'daring', 'fantastic'];
