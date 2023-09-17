@@ -3,7 +3,7 @@ const crypto = require('crypto');
 /////////////////////////////////////////////////////////////////
 const create_third_party_user = async (user_json) => {
   const [col_name, val_name] = [[], []];
-  const templete = { "user_id": "text", "username": "text", "current_session": "text", "password": "text", "last_seen": "text", "availability": "bool", "ip_address": "text", "email": "text", "third_party_login": "int" };
+  const templete = { "user_id": "text", "username": "text", "current_session": "text", "password": "text", "last_seen": "text", "status": "int", "ip_address": "text", "email": "text", "third_party_login": "int" };
   for (let key in templete) if (user_json[key]) {
     col_name.push(key);
     val_name.push(`$[${key}]`);

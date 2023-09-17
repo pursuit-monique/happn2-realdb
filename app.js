@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cors = require("cors");
 const { log_error, log } = require('./logs_.js');
+const verifyUserLogin = require('./controllers/user-control.js').verifyUserLogin;
 /////////////////////////////////////////////////
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
@@ -14,9 +15,14 @@ require('./controllers/load-language').getTranslation(app);
 //control routing entry////////////////////////////////////////////
 const github = require('./controllers/github-webhook.js');
 const user = require('./controllers/user-control.js').uc;
+const event = require('./controllers/event-control.js');
+const public_access = require('./controllers/public-access.js');
 //common routing//////////////////////////////////////////////////
 app.use('/webhook', github);
 app.use('/user', user);
+app.use('/event', verifyUserLogin, event);
+app.use('/public_access', public_access);
+
 //error routing//////////////////////////////////////////////////
 app.get("*", (req, res) => {
   log_error("404");
