@@ -1,5 +1,5 @@
-const API = "https://localhost:8001";
-console.log(API);
+const API = window.location.toString().split('/').slice(0, 3).join("/");
+console.log("current API", API);
 let default_fetch_options = {
   "Access-Control-Allow-Origin": "*",
   "Content-Type": "application/json",
