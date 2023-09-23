@@ -24,22 +24,32 @@ CREATE TABLE happen (
     description text,
     extra_info json DEFAULT '{}'::json,
     status integer DEFAULT 1,
-    create_time timestamp without time zone
+    create_time timestamp without time zone,
+    creator text
 );
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 
 CREATE TABLE happen_detail (
-    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    happen_id integer,
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    happn_id integer,
     lat double precision NOT NULL,
     lng double precision NOT NULL,
     extra_info json DEFAULT '{}'::json,
-    creator integer,
+    creator text,
     status integer DEFAULT 1,
     start_time timestamp without time zone NOT NULL,
     end_time timestamp without time zone NOT NULL,
     price double precision,
     images text[]
 );
+
+-- Indices -------------------------------------------------------
+
+CREATE UNIQUE INDEX happen_detail_pkey ON happen_detail(id uuid_ops);
+CREATE INDEX hash ON happen_detail USING HASH (id uuid_ops);
+CREATE INDEX creator_hash ON happen_detail USING HASH (creator text_ops);
+
 
 CREATE TABLE hashtag (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

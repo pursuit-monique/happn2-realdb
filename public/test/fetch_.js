@@ -69,9 +69,17 @@ function userLoginWithThirdParty(idToken, callback) {
     callback(res);
   });
 }
+function newHappn(happnJson, callback) {
+  const body = { body: JSON.stringify({ happnJson }) };
+  fetch_post(`${API}/event/new`, body, (res) => {
+    callback(res);
+  });
+}
 ///////////////////////////////////////////////
-export {
+export default {
   userLoginWithThirdParty,
   checkLoginFunction,
-  logout
+  logout,
+  //happn/event//////////
+  newHappn
 }

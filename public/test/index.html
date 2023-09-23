@@ -6,14 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happn backend function demo</title>
   <script type="module" defer>
-    import {
-      checkLoginFunction,
-      userLoginWithThirdParty,
-      logout
-    } from './fetch_.js';
+    import srv from './fetch_.js';
     import { authByGoogle } from './auth.js';
     ///entry
-    checkLoginFunction((res) => {
+    srv.checkLoginFunction((res) => {
       console.log(res);
     })
 
@@ -25,21 +21,40 @@
       })
     }
     const handleButtonClick = (name) => {
+      console.log(name)
       switch (name) {
         case "login by google":
           //function start
           authByGoogle(idToken => {
             console.log("token from google", idToken);
-            userLoginWithThirdParty(idToken, (res) => {
+            srv.userLoginWithThirdParty(idToken, (res) => {
               console.log("result from backend", res);
-            })
+            });
           });
           //function end
           break;
         case "logout":
-          logout(res => {
+          srv.logout(res => {
             console.log(res);
-          })
+          });
+          break;
+        ///event related///////////////////
+        case "add an new happn/ event":
+          srv.newHappn({
+            name: "test event name",
+            description: "testing description",
+            happnDetail: [
+              {
+                lat: 0.1,
+                lng: 0.1,
+                start_time: new Date().toUTCString(),
+                end_time: new Date().toUTCString(),
+                images: [],
+              },
+            ]
+          }, res => {
+            console.log(res);
+          });
           break;
       }
     }
@@ -67,7 +82,7 @@
       <ol>
         <li><button name="login by google">login by google</button></li>
         <li><button name="logout">logout</button></li>
-        <li><button name="add a event">add a event</button></li>
+        <li><button name="add an new happn/ event">add a event</button></li>
       </ol>
     </div>
   </div>

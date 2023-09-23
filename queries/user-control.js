@@ -1,4 +1,4 @@
-const db = require("./db-config");
+const db = require("../db/db-config");
 const crypto = require('crypto');
 /////////////////////////////////////////////////////////////////
 const create_third_party_user = async (user_json) => {
