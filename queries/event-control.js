@@ -2,27 +2,49 @@ const db = require("../db/db-config");
 
 const create_new_event = async (happnJson) => {
   try {
-    const happen_template = ['name', "description", "create_time", "creator"];
-    const happen_detail_template = ["happn_id", "lat", "lng", "start_time", "end_time", "creator"];
 
     const ret = await db.tx(async t => {
+      // re-organize data
+      const happen_template = {
+        'name': 50,
+        'description': 1000,
+        'create_time': 50,
+        "creator": 50
+      }
+      happnJson.create_time = new Date().toUTCString();
+      for (let key in happen_template) {
+        happen_template[key] = filter_value(happnJson[key], happen_template[key]);
+      }
       //insert happen
       const happn = await db.one(`INSERT INTO "happen" 
-        (${happen_template.join(',')}) 
-        VALUES(${happen_template.map(el => `$[${el}]`).join(",")}) 
-      RETURNING *;`, { ...happnJson, create_time: new Date().toUTCString() });
+        (${Object.keys(happen_template).join(',')}) 
+        VALUES(${Object.keys(happen_template).map(el => `$[${el}]`).join(",")}) 
+      RETURNING *;`, happen_template);
 
+      //re-organize data
+      const happen_detail_template = {
+        "happn_id": "number",
+        "lat": "number",
+        "lng": "number",
+        "start_time": 50,
+        "end_time": 50,
+        "creator": 50
+      }
       const { happnDetail } = happnJson;
-      //insert happen_detail
-      const values = happnDetail.map(el => {
-        const { id: happn_id, creator } = happn;
-        el.happn_id = happn_id;
-        el.creator = creator;
-        return "(" + happen_detail_template.map(sel => `'${el[sel]}'`).join(",") + `)`;
-      }).join(",");
+      const values = [];
+      for (let item of happnDetail) {
+        item.happn_id = happn.id;
+        item.creator = happn.creator;
+        const string_arr = [];
+        for (let key in happen_detail_template) {
+          string_arr.push("'" + filter_value(item[key], happen_detail_template[key]) + "'")
+        }
+        values.push("(" + string_arr.join(",") + ")");
+      }
+
       const happn_detail = await db.one(`INSERT INTO "happen_detail" 
-        (${happen_detail_template.join(',')}) 
-        VALUES ${values} 
+        (${Object.keys(happen_detail_template).join(',')}) 
+        VALUES ${values.join(",")}
       RETURNING *;`);
       return { happn, happn_detail };
     });
@@ -34,4 +56,17 @@ const create_new_event = async (happnJson) => {
   }
 }
 
+function filter_value(val, filter) {
+  switch (typeof filter) {
+    case "string":
+      return isNaN(Number(val)) ? 0 : val;
+    case "number":
+      return val.slice(0, filter).replace("'", "\'");
+    default:
+      console.log("default", typeof filter);
+      return val;
+
+  }
+
+}
 module.exports = { create_new_event }
