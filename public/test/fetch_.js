@@ -69,11 +69,17 @@ function userLoginWithThirdParty(idToken, callback) {
     callback(res);
   });
 }
-function newHappn(happnJson, callback) {
-  const body = { body: JSON.stringify({ happnJson }) };
+function newHappn(formData, callback) {
+  const body = { body: formData, headers: { "Content-Type": "delete" }, };
+
   fetch_post(`${API}/event/new`, body, (res) => {
     callback(res);
   });
+}
+function checkImageExist(fileHash, callback) {
+  fetch_get(`${API}/public_access/check_image_exist/${fileHash}`, res => {
+    callback(res);
+  })
 }
 ///////////////////////////////////////////////
 export default {
@@ -81,5 +87,6 @@ export default {
   checkLoginFunction,
   logout,
   //happn/event//////////
-  newHappn
+  newHappn,
+  checkImageExist
 }

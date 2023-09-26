@@ -2,3 +2,5 @@
 /ssl
 .env
 firebase-adminsdk.json
+/happn-images
+/uploads
