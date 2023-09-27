@@ -22,7 +22,6 @@ app.use('/webhook', github);
 app.use('/user', user);
 app.use('/event', verifyUserLogin, event);
 app.use('/public_access', public_access);
-
 //error routing//////////////////////////////////////////////////
 app.get("*", (req, res) => {
   log_error("404");

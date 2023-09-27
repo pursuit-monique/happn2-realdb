@@ -70,8 +70,8 @@ function userLoginWithThirdParty(idToken, callback) {
   });
 }
 function newHappn(formData, callback) {
+  //set content-type to delete, means let the Browser generate the content-type, in this request should be "multipart/form-data;" with the Boundary string 
   const body = { body: formData, headers: { "Content-Type": "delete" }, };
-
   fetch_post(`${API}/event/new`, body, (res) => {
     callback(res);
   });

@@ -51,6 +51,23 @@ CREATE INDEX hash ON happen_detail USING HASH (id uuid_ops);
 CREATE INDEX creator_hash ON happen_detail USING HASH (creator text_ops);
 
 
+CREATE TABLE happen_detail_images (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    happen_detail_id text,
+    file_hash text,
+    timestamp timestamp without time zone,
+    originalname text,
+    mimetype text,
+    size integer
+);
+
+-- Indices -------------------------------------------------------
+
+CREATE UNIQUE INDEX happen_detail_images_pkey ON happen_detail_images(id int4_ops);
+CREATE INDEX happen_detail_id ON happen_detail_images(happen_detail_id text_ops);
+
+
+
 CREATE TABLE hashtag (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name text,
@@ -68,3 +85,4 @@ CREATE TABLE hashtag_to_user (
     hashtag_id integer,
     user_id integer
 );
+
