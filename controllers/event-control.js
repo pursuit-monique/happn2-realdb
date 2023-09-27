@@ -34,7 +34,6 @@ ec.post('/new', upload.any(), async (req, res) => {
       const ret = process_upload_images(file);
       if (ret) imagesRet[ret.file_hash] = file;
     }
-    console.log(imagesRet);
     //check the happn json's happnDetail's images with uploaded file
     happnJson.happnDetail.forEach((happn_detail, idx) => {
       happn_detail.images.forEach((image, sub_idx) => {
@@ -44,10 +43,10 @@ ec.post('/new', upload.any(), async (req, res) => {
       })
     })
     happnJson.imagesRet = imagesRet;
-    console.log("json object", happnJson);
+    //insert into db
     const ret = await create_new_event(happnJson);
-    console.log("json object", ret);
-    res.json({ payload: "" });
+    //return it to frondend
+    res.json({ payload: ret });
   } catch (error) {
     log_error(error);
     res.status(500).json({ error: error.message });
@@ -57,6 +56,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     }
   }
 })
+
 ///////////////////////////////////////////////////////
 function remove_file_from_local() {
 
