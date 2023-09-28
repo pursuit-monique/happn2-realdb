@@ -1,62 +1,87 @@
 const db = require("../db/db-config");
-const { log_error, log } = require('../logs_.js');
+const { log_error, performance_timer } = require('../logs_.js');
 const { clean_up_uuid } = require('../str_filter');
 ////////////////////////////////////////////////
-const happen_template_to_save = {
-  'name': 50,
-  'description': 1000,
-  'create_time': 50,
-  "creator": 50
+function happen_template_to_save_() {
+  return {
+    'name': 50,
+    'description': 1000,
+    'create_time': 50,
+    "creator": 50
+  }
 }
-const happen_detail_template_to_save = {
-  "happn_id": 50,
-  "lat": "number",
-  "lng": "number",
-  "start_time": 50,
-  "end_time": 50,
-  "creator": 50
+const happen_detail_template_to_save_ = () => {
+  return {
+    "happn_id": 50,
+    "lat": "number",
+    "lng": "number",
+    "start_time": 50,
+    "end_time": 50,
+    "creator": 50
+  }
 }
-const detail_image_template_to_save = {
-  "file_hash": 260,
-  "timestamp": 50,
-  "originalname": 100,
-  "mimetype": 50,
-  "size": "number"
+const detail_image_template_to_save_ = () => {
+  return {
+    "file_hash": 260,
+    "timestamp": 50,
+    "originalname": 100,
+    "mimetype": 50,
+    "size": "number"
+  }
 }
-const happen_template_to_show = {
-  "name": "",
-  "description": "",
-  "extra_info": "",
-  "status": "",
-  "create_time": "",
-  "creator": ""
+const happen_template_to_show_ = () => {
+  return {
+    "name": "",
+    "description": "",
+    "extra_info": "",
+    "status": "",
+    "create_time": "",
+    "creator": ""
+  }
 }
-const happen_detail_template_to_show = {
-  "id": "",
-  "lat": "",
-  "lng": "",
-  "extra_info": "",
-  "creator": "",
-  "start_time": "",
-  "end_time": "",
+const happen_detail_template_to_show_ = () => {
+  return {
+    "id": "",
+    "lat": "",
+    "lng": "",
+    "extra_info": "",
+    "creator": "",
+    "start_time": "",
+    "end_time": "",
+  }
 }
-const detail_image_template_to_show = {
-  "file_hash": 260,
-  "timestamp": 50,
-  "originalname": 100,
-  "mimetype": 50,
-  "size": "number"
+const detail_image_template_to_show_ = () => {
+  return {
+    "file_hash": 260,
+    "timestamp": 50,
+    "originalname": 100,
+    "mimetype": 50,
+    "size": "number"
+  }
 }
 /////////////////////////////////////////////////
 const create_new_event = async (happnJson) => {
+  console.log(happnJson)
+  const happen_template_to_save = happen_template_to_save_();
+  const happen_detail_template_to_save = happen_detail_template_to_save_();
+  const detail_image_template_to_save = detail_image_template_to_save_();
+  const happen_detail_template_to_show = happen_detail_template_to_show_();
+  const detail_image_template_to_show = detail_image_template_to_show_();
+
+  const pt = new performance_timer();
+  const connection = await db.connect();
   try {
+    console.log(db.$pool);
+
     const current_date = new Date().toUTCString();
-    const ret = await db.tx(async t => {
+    const ret = await connection.tx(async t => {
+      pt.add_tick("transaction created");
       // re-organize data
       happnJson.create_time = current_date;
       for (let key in happen_template_to_save) {
         happen_template_to_save[key] = filter_value(happnJson[key], happen_template_to_save[key]);
       }
+      pt.add_tick("inserting happn");
       //insert happen
       const happn = await t.one(`
         INSERT INTO "happen" 
@@ -89,6 +114,7 @@ const create_new_event = async (happnJson) => {
           images: images_arr
         });
       }
+      pt.add_tick("adding detail");
       const happn_detail = [];
       //insert detail and images
       for (let { detail, images } of values) {
@@ -97,6 +123,7 @@ const create_new_event = async (happnJson) => {
           VALUES ${detail}
           RETURNING ${Object.keys(happen_detail_template_to_show).join(',')};
         `);
+        pt.add_tick("adding images");
         if (images.length > 0) {
           ret_happen_detail.images = await t.many(`
           INSERT INTO happen_detail_images (happen_detail_id,${Object.keys(detail_image_template_to_save).join(',')})
@@ -112,6 +139,9 @@ const create_new_event = async (happnJson) => {
   } catch (error) {
     log_error(error);
     return false;
+  } finally {
+    console.log(pt.result());
+    if (connection) connection.done();
   }
 }
 
