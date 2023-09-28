@@ -51,7 +51,6 @@ const detail_image_template_to_show = {
 const create_new_event = async (happnJson) => {
   try {
     const current_date = new Date().toUTCString();
-    // console.log(happnJson);
     const ret = await db.tx(async t => {
       // re-organize data
       happnJson.create_time = current_date;
@@ -59,10 +58,11 @@ const create_new_event = async (happnJson) => {
         happen_template_to_save[key] = filter_value(happnJson[key], happen_template_to_save[key]);
       }
       //insert happen
-      const happn = await t.one(`INSERT INTO "happen" 
+      const happn = await t.one(`
+        INSERT INTO "happen" 
         (${Object.keys(happen_template_to_save).join(',')}) 
         VALUES(${Object.keys(happen_template_to_save).map(el => `$[${el}]`).join(",")}) 
-      RETURNING *;`, happen_template_to_save);
+      RETURNING * ;`, happen_template_to_save);
       //re-organize data
       const { happnDetail, imagesRet } = happnJson;
       const values = [];
@@ -97,13 +97,14 @@ const create_new_event = async (happnJson) => {
           VALUES ${detail}
           RETURNING ${Object.keys(happen_detail_template_to_show).join(',')};
         `);
-
-        ret_happen_detail.images = await t.many(`
-        INSERT INTO happen_detail_images (happen_detail_id,${Object.keys(detail_image_template_to_save).join(',')})
-        VALUES ${images.join(',')} 
-        RETURNING ${Object.keys(detail_image_template_to_show).join(',')}`,
-          { detail_id: ret_happen_detail.id });
-        happn_detail.push(ret_happen_detail);
+        if (images.length > 0) {
+          ret_happen_detail.images = await t.many(`
+          INSERT INTO happen_detail_images (happen_detail_id,${Object.keys(detail_image_template_to_save).join(',')})
+          VALUES ${images.join(',')} 
+          RETURNING ${Object.keys(detail_image_template_to_show).join(',')}`,
+            { detail_id: ret_happen_detail.id });
+          happn_detail.push(ret_happen_detail);
+        }
       }
       return { happn, happn_detail };
     });
@@ -139,7 +140,8 @@ function filter_value(val, filter) {
     case "string":
       return isNaN(Number(val)) ? 0 : val;
     case "number":
-      return val.slice(0, filter).replace("'", "\'");
+      //remove \ and ' from string
+      return val.slice(0, filter).replace('\\', "").replace("'", "\'");
     default:
       console.log("event-control-filter-value default", typeof filter);
       return val;
