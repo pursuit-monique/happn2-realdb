@@ -27,6 +27,7 @@ ec.post('/new', upload.any(), async (req, res) => {
       throw new Error(`JSON object over size.`);
     }
     const happnJson = JSON.parse(happn);
+
     happnJson['creator'] = req.session.userInfo.userId;
     //files
     const imagesRet = {};
