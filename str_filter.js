@@ -30,7 +30,13 @@ function user_input_letter_and_numbers_only(str) {
   }
 }
 
+function clean_up_uuid(uuid) {
+  const regex = /[^0-9a-fA-F-]/g;  // Match characters that are NOT [0-9a-fA-F-]
+  return uuid.replace(regex, '');
+}
+
 module.exports = {
   user_input_filter,
   user_input_letter_and_numbers_only,
+  clean_up_uuid
 }

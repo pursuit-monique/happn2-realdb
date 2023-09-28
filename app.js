@@ -7,7 +7,7 @@ const { log_error, log } = require('./logs_.js');
 const verifyUserLogin = require('./controllers/user-control.js').verifyUserLogin;
 /////////////////////////////////////////////////
 app.use(cors({ credentials: true, origin: true }));
-app.use(express.json());
+app.use(express.json({ type: "application/json", limit: "1mb" }));
 app.use(express.static("./public"));
 //middle ware/////////
 require('./session-config')(app);
@@ -22,7 +22,6 @@ app.use('/webhook', github);
 app.use('/user', user);
 app.use('/event', verifyUserLogin, event);
 app.use('/public_access', public_access);
-
 //error routing//////////////////////////////////////////////////
 app.get("*", (req, res) => {
   log_error("404");

@@ -4,9 +4,9 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 require("dotenv").config();
-const {HTTPS_PORT, HTTP_PORT} = process.env;
+const { HTTPS_PORT, HTTP_PORT } = process.env;
 const options = {
-  key : fs.readFileSync('./ssl/localhost-key.pem'),
+  key: fs.readFileSync('./ssl/localhost-key.pem'),
   cert: fs.readFileSync('./ssl/localhost-cert.pem')
 };
 
@@ -26,6 +26,6 @@ try {
 }
 
 function handle_client_error(error, socket) {
-  log_error('clientError:', error);
+  // log_error('clientError:', error);
   socket.destroy();  // This will destroy the socket
 }

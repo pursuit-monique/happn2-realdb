@@ -5,8 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happn backend function demo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <script type="module" defer>
     import srv from './fetch_.js';
+    import { createFileHash } from './general_.js';
     import { authByGoogle } from './auth.js';
     ///entry
     srv.checkLoginFunction((res) => {
@@ -20,6 +22,22 @@
         handleButtonClick(evt.target.name);
       })
     }
+    //update inputs with event
+    const filesInput = document.querySelectorAll("input[type=file]");
+    for (let input of filesInput) input.addEventListener("change", async evt => {
+      evt.target.disabled = true;
+      for (let idx = 0; idx < evt.target.files.length; idx++) {
+        evt.target.files[idx]['hash'] = await createFileHash(evt.target.files[idx]);
+        //check the file is exists on the server or not, and mark the file needs to be upload or not
+        srv.checkImageExist(evt.target.files[idx]['hash'], res => {
+          console.log("checkImageExist", res);
+          if (res.payload === false) {
+            evt.target.files[idx]['isUpload'] = true;
+          }
+        })
+      }
+      evt.target.disabled = false;
+    })
     const handleButtonClick = (name) => {
       console.log(name)
       switch (name) {
@@ -40,7 +58,17 @@
           break;
         ///event related///////////////////
         case "add an new happn/ event":
-          srv.newHappn({
+          const imageFiles = document.querySelector("#new_happn_images").files;
+
+          const formData = new FormData();
+          const imagesHash = [];
+          for (let file of imageFiles) {
+            imagesHash.push(file);
+            if (file.isUpload) {
+              formData.append("files", file);
+            }
+          }
+          formData.append("happn", JSON.stringify({
             name: "test event name",
             description: "testing description",
             happnDetail: [
@@ -49,10 +77,12 @@
                 lng: 0.1,
                 start_time: new Date().toUTCString(),
                 end_time: new Date().toUTCString(),
-                images: [],
+                images: imagesHash,
               },
             ]
-          }, res => {
+          }));
+          console.log(formData);
+          srv.newHappn(formData, res => {
             console.log(res);
           });
           break;
@@ -82,7 +112,9 @@
       <ol>
         <li><button name="login by google">login by google</button></li>
         <li><button name="logout">logout</button></li>
-        <li><button name="add an new happn/ event">add a event</button></li>
+        <li><button name="add an new happn/ event">add a event</button> <input id="new_happn_images" type="file"
+            multiple />
+        </li>
       </ol>
     </div>
   </div>

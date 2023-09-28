@@ -3,6 +3,8 @@ CREATE TABLE session (
     sess json NOT NULL,
     expire timestamp(6) without time zone NOT NULL
 );
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE "user" (
     id SERIAL PRIMARY KEY,
     current_session character varying,
@@ -18,8 +20,10 @@ CREATE TABLE "user" (
     status integer DEFAULT 1
 );
 
+-- Table Definition ----------------------------------------------
+
 CREATE TABLE happen (
-    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
     name text,
     description text,
     extra_info json DEFAULT '{}'::json,
@@ -27,12 +31,18 @@ CREATE TABLE happen (
     create_time timestamp without time zone,
     creator text
 );
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Indices -------------------------------------------------------
+
+CREATE UNIQUE INDEX happen_pkey ON happen(id uuid_ops);
+CREATE INDEX happen_id_hash ON happen USING HASH (id uuid_ops);
+
+
+-- Table Definition ----------------------------------------------
 
 CREATE TABLE happen_detail (
     id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-    happn_id integer,
+    happn_id text,
     lat double precision NOT NULL,
     lng double precision NOT NULL,
     extra_info json DEFAULT '{}'::json,
@@ -40,15 +50,33 @@ CREATE TABLE happen_detail (
     status integer DEFAULT 1,
     start_time timestamp without time zone NOT NULL,
     end_time timestamp without time zone NOT NULL,
-    price double precision,
-    images text[]
+    price double precision
 );
 
 -- Indices -------------------------------------------------------
 
 CREATE UNIQUE INDEX happen_detail_pkey ON happen_detail(id uuid_ops);
-CREATE INDEX hash ON happen_detail USING HASH (id uuid_ops);
-CREATE INDEX creator_hash ON happen_detail USING HASH (creator text_ops);
+CREATE INDEX happen_detail_id_hash ON happen_detail USING HASH (id uuid_ops);
+CREATE INDEX creator_hash_on_happen_detail ON happen_detail USING HASH (creator text_ops);
+
+
+-- Table Definition ----------------------------------------------
+
+CREATE TABLE happen_detail_images (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    happen_detail_id text,
+    file_hash text,
+    timestamp timestamp without time zone,
+    originalname text,
+    mimetype text,
+    size integer
+);
+
+-- Indices -------------------------------------------------------
+
+CREATE UNIQUE INDEX happen_detail_images_pkey ON happen_detail_images(id int4_ops);
+CREATE INDEX happen_detail_id_hash_on_image ON happen_detail_images USING HASH (happen_detail_id text_ops);
+
 
 
 CREATE TABLE hashtag (
@@ -68,3 +96,4 @@ CREATE TABLE hashtag_to_user (
     hashtag_id integer,
     user_id integer
 );
+
