@@ -39,7 +39,7 @@
       evt.target.disabled = false;
     })
     const handleButtonClick = (name) => {
-      console.log(name)
+      console.log("clicked button name", name);
       switch (name) {
         case "login by google":
           //function start
@@ -81,10 +81,18 @@
               },
             ]
           }));
-          console.log(formData);
+          console.log("newHappn form data", formData);
           srv.newHappn(formData, res => {
-            console.log(res);
+            console.log("newHappn result", res);
           });
+          break;
+        case "view an happn/ event":
+          const happnId = document.querySelector("#happn_id_input_for_viewing").value;
+
+          console.log("requesting happn id", happnId);
+          srv.getHappnById(happnId, res => {
+            console.log("getHappnById result", res);
+          })
           break;
       }
     }
@@ -115,6 +123,8 @@
         <li><button name="add an new happn/ event">add a event</button> <input id="new_happn_images" type="file"
             multiple accept="image/*" />
         </li>
+        <li><button name="view an happn/ event">view an happn/ event</button> <input id="happn_id_input_for_viewing"
+            type="text" value="20cf645a-3959-42b7-90ca-50ce9225e3b0" /></li>
       </ol>
     </div>
   </div>

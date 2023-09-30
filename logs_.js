@@ -1,3 +1,4 @@
+var debug_mode = true;
 function log_error() {
   console.error(...arguments);
 }
@@ -8,19 +9,24 @@ function log() {
 
 class performance_timer {
   constructor() {
+    if (!debug_mode) return;
     this.start_time = process.uptime();
     this.checkpoint = [];
   }
   add_tick(tick_name) {
+    if (!debug_mode) return;
     this.checkpoint.push({
       name: tick_name,
       time: (process.uptime() - this.start_time + " - seconds")
     })
   }
-  result() {
+  done() {
+    if (!debug_mode) return;
     this.add_tick("ending");
-    return this.checkpoint;
+    console.log(this.checkpoint);
   }
 }
-
-module.exports = { log_error, log, performance_timer };
+function set_debug_mode(bool) {
+  debug_mode = bool;
+}
+module.exports = { log_error, log, performance_timer, set_debug_mode };

@@ -76,6 +76,11 @@ function newHappn(formData, callback) {
     callback(res);
   });
 }
+function getHappnById(happnId, callback) {
+  fetch_get(`${API}/event_public_access/get_happn_by_id/${happnId}`, res => {
+    callback(res);
+  })
+}
 function checkImageExist(fileHash, callback) {
   fetch_get(`${API}/public_access/check_image_exist/${fileHash}`, res => {
     callback(res);
@@ -88,5 +93,6 @@ export default {
   logout,
   //happn/event//////////
   newHappn,
+  getHappnById,
   checkImageExist
 }

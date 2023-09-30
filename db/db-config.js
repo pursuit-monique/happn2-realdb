@@ -14,10 +14,7 @@ try {
   var db = pgp(connectionOptions);
 
 } catch (error) {
-
+  console.error("database connection error", error);
 }
-// const conString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DB}`;
-
-// const db = pgp(conString);
 
 module.exports = db;
