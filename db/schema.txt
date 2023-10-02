@@ -6,7 +6,7 @@ CREATE TABLE session (
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE "user" (
-    id SERIAL PRIMARY KEY,
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
     current_session character varying,
     user_id text UNIQUE,
     username text,
@@ -39,7 +39,6 @@ CREATE INDEX happen_id_hash ON happen USING HASH (id uuid_ops);
 
 
 -- Table Definition ----------------------------------------------
-
 CREATE TABLE happen_detail (
     id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
     happn_id text,
@@ -50,7 +49,8 @@ CREATE TABLE happen_detail (
     status integer DEFAULT 1,
     start_time timestamp without time zone NOT NULL,
     end_time timestamp without time zone NOT NULL,
-    price double precision
+    price double precision,
+    lasest_update timestamp without time zone
 );
 
 -- Indices -------------------------------------------------------
@@ -58,6 +58,7 @@ CREATE TABLE happen_detail (
 CREATE UNIQUE INDEX happen_detail_pkey ON happen_detail(id uuid_ops);
 CREATE INDEX happen_detail_id_hash ON happen_detail USING HASH (id uuid_ops);
 CREATE INDEX creator_hash_on_happen_detail ON happen_detail USING HASH (creator text_ops);
+CREATE INDEX detail_happn_id ON happen_detail(happn_id text_ops);
 
 
 -- Table Definition ----------------------------------------------

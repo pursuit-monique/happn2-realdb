@@ -44,7 +44,7 @@ uc.post('/login_by_third_party', async (req, res) => {
 
           res.json({ payload: templete });
           //add user id back to session
-          templete['userId'] = ret['user_id'];
+          templete['id'] = ret['id'];
           req.session.userInfo = templete;
           req.session.save();
         } else {
@@ -77,10 +77,10 @@ function verifyUserLogin(req, res, next) {
     if (req.session.userInfo === undefined) {
       //new session, no login also
       throw new Error("You need to login first.");
-    } else if (req.session.userInfo.userId === undefined) {
+    } else if (req.session.userInfo.id === undefined) {
       //was login, but logout already
       throw new Error("You need to login first.");
-    } else if (req.session.userInfo.userId) {
+    } else if (req.session.userInfo.id) {
       //login user
       //if success
       next();

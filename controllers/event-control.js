@@ -2,6 +2,7 @@ const express = require("express");
 const ec = express.Router();
 const crypto = require('crypto');
 const fs = require('fs');
+const path = require('path');
 const multer = require("multer");
 const { processed_file_path, event_image_file_size_limit, event_json_size_limit } = require('../variables_.js');
 const upload = multer({
@@ -31,7 +32,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     }
     const happnJson = JSON.parse(happn);
 
-    happnJson['creator'] = req.session.userInfo.userId;
+    happnJson['creator'] = req.session.userInfo.id;
     //files
     const imagesRet = {};
     if (req.files?.length > 0) for (let file of req.files) {
