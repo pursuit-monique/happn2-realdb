@@ -94,6 +94,11 @@
             console.log("getHappnById result", res);
           })
           break;
+        case "view a image by file hash":
+          const imageEl = document.querySelector("#happn_detail_image_display");
+          const fileHash = document.querySelector("#happn_detail_image_file_hash_input").value;
+          imageEl.src = `${window.location.origin}/event_public_access/get_happn_image/${fileHash}`
+          break;
       }
     }
     ///
@@ -123,8 +128,15 @@
         <li><button name="add an new happn/ event">add a event</button> <input id="new_happn_images" type="file"
             multiple accept="image/*" />
         </li>
-        <li><button name="view an happn/ event">view an happn/ event</button> <input id="happn_id_input_for_viewing"
-            type="text" value="5e9ba9d9-f000-49ce-b980-e9d663417c3d" /></li>
+        <li>
+          <button name="view an happn/ event">view an happn/ event</button>
+          <input id="happn_id_input_for_viewing" type="text" value="5e9ba9d9-f000-49ce-b980-e9d663417c3d" />
+        </li>
+        <li><button name="view a image by file hash">view a image by file hash</button> <input
+            id="happn_detail_image_file_hash_input" type="text"
+            value="d7aeeba955999ad886bde0754c599e34679a7f1de7c4f0cb77301dcd06d304f9" />
+          <img id="happn_detail_image_display" src="" alt="image for happn" />
+        </li>
       </ol>
     </div>
   </div>
