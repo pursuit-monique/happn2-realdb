@@ -2,11 +2,15 @@ const express = require("express");
 const ec = express.Router();
 const crypto = require('crypto');
 const fs = require('fs');
+const path = require('path');
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const { processed_file_path, event_image_file_size_limit, event_json_size_limit } = require('../variables_.js');
+const upload = multer({
+  dest: "uploads/"
+});
 const { log_error, log } = require('../logs_.js');
 const { create_new_event } = require('../queries/event-control.js');
-const { processed_file_path, event_image_file_size_limit, event_json_size_limit } = require('../variables_.js');
+
 if (!fs.existsSync(processed_file_path)) fs.mkdirSync(processed_file_path);
 ///////////////////////////////////////////////////////
 ec.get("/", async (req, res) => {
@@ -28,7 +32,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     }
     const happnJson = JSON.parse(happn);
 
-    happnJson['creator'] = req.session.userInfo.userId;
+    happnJson['creator'] = req.session.userInfo.id;
     //files
     const imagesRet = {};
     if (req.files?.length > 0) for (let file of req.files) {
@@ -79,13 +83,19 @@ function process_upload_images(file) {
     }
      */
     const file_path = `${__dirname}/../${file.path}`
-    //check size check point
+    //file size check point
     const stats = fs.statSync(file_path);
     if (file.size !== stats.size) {
       throw new Error(`file size is not matched, real size (${stats.size}), but claiming (${file.size}).`);
     }
+
     if (file.size > event_image_file_size_limit) {
       throw new Error(`image file over size, max_limit = ${event_image_file_size_limit}`);
+    }
+    //file extension check point
+    var ext = path.extname(file.originalname);
+    if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+      throw new Error('Only images are allowed');
     }
     //create file hash
     const file_content = fs.readFileSync(file_path);
