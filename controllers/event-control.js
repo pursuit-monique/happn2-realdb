@@ -4,9 +4,10 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const multer = require("multer");
-const { processed_file_path, event_image_file_size_limit, event_json_size_limit } = require('../variables_.js');
+const { processed_file_path, event_image_file_size_limit, event_json_size_limit, root_path, tmp_upload_file_path } = require('../variables_.js');
+console.log("tmp ptah", tmp_upload_file_path);
 const upload = multer({
-  dest: "uploads/"
+  dest: tmp_upload_file_path
 });
 const { log_error, log } = require('../logs_.js');
 const { create_new_event } = require('../queries/event-control.js');
@@ -35,6 +36,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     happnJson['creator'] = req.session.userInfo.id;
     //files
     const imagesRet = {};
+    console.log(req.files);
     if (req.files?.length > 0) for (let file of req.files) {
       const ret = process_upload_images(file);
       if (ret) imagesRet[ret.file_hash] = file;
@@ -57,7 +59,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     res.status(500).json({ error: error.message });
     //remove all uploaded file if error
     if (req.files?.length > 0) for (let file of req.files) {
-      fs.unlinkSync(`${__dirname}/../${file.path}`);
+      if (file.path) fs.unlinkSync(tmp_upload_file_path + path.parse(file.path).base);
     }
   }
 })
@@ -65,6 +67,19 @@ ec.post('/new', upload.any(), async (req, res) => {
 ///////////////////////////////////////////////////////
 function remove_file_from_local() {
 
+}
+function read_file_content_from_request_file(file) {
+  let file_content = undefined;
+  let file_path = undefined;
+
+  if (file.path) {
+    //if file have a path
+    file_path = tmp_upload_file_path + path.parse(file.path).base;
+    file_content = fs.readFileSync(file_path);
+  } else {
+    file_content = file.buffer;
+  }
+  return { file_content, file_path };
 }
 ///////////////////////////////////////////////////////
 function process_upload_images(file) {
@@ -82,10 +97,10 @@ function process_upload_images(file) {
       
     }
      */
-    const file_path = `${__dirname}/../${file.path}`
+    // const file_path = `${__dirname}/../${file.path}`;
+    const { file_content, file_path } = read_file_content_from_request_file(file);
     //file size check point
-    const stats = fs.statSync(file_path);
-    if (file.size !== stats.size) {
+    if (file.size !== file_content.length) {
       throw new Error(`file size is not matched, real size (${stats.size}), but claiming (${file.size}).`);
     }
 
@@ -98,7 +113,7 @@ function process_upload_images(file) {
       throw new Error('Only images are allowed');
     }
     //create file hash
-    const file_content = fs.readFileSync(file_path);
+
     const file_hash = crypto.createHash('sha256').update(file_content).digest('hex');
     //Processing file, if exists just delete the uploaded file
     if (fs.existsSync(`${processed_file_path}/${file_hash}`)) {
