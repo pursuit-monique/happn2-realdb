@@ -27,7 +27,7 @@ app.use('/public_access', public_access);
 app.use('/event_public_access', event_public_access);
 //error routing////////////////////////////////
 app.get("*", (req, res) => {
-  log_error("404");
+  log_error("404", req.originalUrl);
   const file_path = `${__dirname}/public/index.html`;
   if (fs.existsSync(file_path)) {
     res.sendFile(file_path);

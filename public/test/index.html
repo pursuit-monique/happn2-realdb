@@ -88,7 +88,6 @@
           break;
         case "view an happn/ event":
           const happnId = document.querySelector("#happn_id_input_for_viewing").value;
-
           console.log("requesting happn id", happnId);
           srv.getHappnById(happnId, res => {
             console.log("getHappnById result", res);
