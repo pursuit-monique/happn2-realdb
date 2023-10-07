@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const multer = require("multer");
 const { processed_file_path, event_image_file_size_limit, event_json_size_limit, root_path, tmp_upload_file_path } = require('../variables_.js');
-console.log("tmp ptah", tmp_upload_file_path);
 const upload = multer({
   dest: tmp_upload_file_path
 });
@@ -59,7 +58,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     res.status(500).json({ error: error.message });
     //remove all uploaded file if error
     if (req.files?.length > 0) for (let file of req.files) {
-      if (file.path) fs.unlinkSync(tmp_upload_file_path + path.parse(file.path).base);
+      if (file.path) fs.unlinkSync(tmp_upload_file_path + path.parse(file.path).base.replace(/\//g, '\\\\'));
     }
   }
 })
@@ -117,9 +116,9 @@ function process_upload_images(file) {
     const file_hash = crypto.createHash('sha256').update(file_content).digest('hex');
     //Processing file, if exists just delete the uploaded file
     if (fs.existsSync(`${processed_file_path}/${file_hash}`)) {
-      fs.unlinkSync(file_path);
+      fs.unlinkSync(file_path.replace(/\//g, '\\\\'));
     } else {
-      fs.renameSync(file_path, `${processed_file_path}/${file_hash}`);
+      fs.renameSync(file_path.replace(/\//g, '\\\\'), `${processed_file_path}/${file_hash}`);
     }
     return { result: "success", file_hash };
   } catch (error) {
