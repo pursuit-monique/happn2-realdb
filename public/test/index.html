@@ -31,7 +31,7 @@
         //check the file is exists on the server or not, and mark the file needs to be upload or not
         srv.checkImageExist(evt.target.files[idx]['hash'], res => {
           console.log("checkImageExist", res);
-          if (res.payload === false) {
+          if (res.payload?.exists === false) {
             evt.target.files[idx]['isUpload'] = true;
           }
         })
@@ -63,7 +63,8 @@
           const formData = new FormData();
           const imagesHash = [];
           for (let file of imageFiles) {
-            imagesHash.push(file);
+            const { hash, name, size, type, isUpload } = file;
+            imagesHash.push({ hash, name, size, type, isUpload });
             if (file.isUpload) {
               formData.append("files", file);
             }
@@ -78,6 +79,7 @@
                 start_time: new Date().toUTCString(),
                 end_time: new Date().toUTCString(),
                 images: imagesHash,
+                description: "detail description"
               },
             ]
           }));
@@ -135,6 +137,18 @@
             id="happn_detail_image_file_hash_input" type="text"
             value="d7aeeba955999ad886bde0754c599e34679a7f1de7c4f0cb77301dcd06d304f9" />
           <img id="happn_detail_image_display" src="" alt="image for happn" />
+        </li>
+        <li>
+          <button>aaa</button>
+          <select>
+            <option>lat</option>
+            <option>lng</option>
+            <option>extra_info</option>
+            <option>status</option>
+            <option>start_time</option>
+            <option>end_time</option>
+            <option>description</option>
+          </select>
         </li>
       </ol>
     </div>

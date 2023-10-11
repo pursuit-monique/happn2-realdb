@@ -17,8 +17,9 @@ pa.get("/", async (req, res) => {
 pa.get('/check_image_exist/:file_hash', async (req, res) => {
   try {
     const { file_hash } = req.params;
-    const ret = fs.existsSync(processed_file_path + user_input_letter_and_numbers_only(file_hash));
-    res.json({ payload: ret });
+    const ret = fs.existsSync(`${processed_file_path}/${user_input_letter_and_numbers_only(file_hash)}`);
+    console.log(`${processed_file_path}/${user_input_letter_and_numbers_only(file_hash)}`)
+    res.json({ payload: { exists: ret } });
   } catch (error) {
     log_error(error);
     res.status(500).json({ error: error.message });
