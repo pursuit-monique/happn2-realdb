@@ -16,7 +16,8 @@ const happen_detail_template_to_save_ = () => ({
   "lng": "number",
   "start_time": 50,
   "end_time": 50,
-  "creator": 50
+  "creator": 50,
+  "description": 1000
 })
 
 const detail_image_template_to_save_ = () => ({
@@ -42,6 +43,7 @@ const happen_detail_template_to_show_ = () => ({
   "creator": "",
   "start_time": "",
   "end_time": "",
+  "description": ""
 })
 const detail_image_template_to_show_ = () => ({
   "file_hash": 260,
@@ -88,13 +90,14 @@ const create_new_event = async (happnJson) => {
           string_arr.push("'" + filter_value(item[key], detail_t_to_save[key]) + "'");
         }
         //re-organize and vaild the images data
+
         const images_arr = [];
-        for (let image_hash in imagesRet) {
-          imagesRet[image_hash].file_hash = image_hash;
-          imagesRet[image_hash].timestamp = current_date;
+        for (let image of item.images) {
+          image.file_hash = image.hash;
+          image.timestamp = current_date;
           let image_arr = [];
           for (let key in image_t_to_save) {
-            image_arr.push("'" + filter_value(imagesRet[image_hash][key], image_t_to_save[key]) + "'");
+            image_arr.push("'" + filter_value(image[key], image_t_to_save[key]) + "'");
           }
           images_arr.push(`($[detail_id], ${image_arr.join(",")})`);
         }

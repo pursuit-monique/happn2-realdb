@@ -1,5 +1,5 @@
-const processed_file_path = __dirname + "/happn-images";
 const root_path = __dirname;
+const processed_file_path = root_path + "/happn-images";
 const tmp_upload_file_path = root_path + "/uploads/";
 
 const event_image_file_size_limit = 5_000_000;//5mb
