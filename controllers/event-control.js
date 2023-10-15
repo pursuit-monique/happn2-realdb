@@ -74,13 +74,12 @@ ec.post('/new', upload.any(), async (req, res) => {
   }
 });
 
-ec.patch('update_detail', async (req, res) => {
+ec.put('/update_detail', async (req, res) => {
   try {
-    const { happn } = req.body;
-    req.log(happn);
+    const { happn_detail, happn_detail_id } = req.body;
+    req.log(happn_detail, happn_detail_id);
 
     // const ret = await update_happn_detail(happn.detailId, req.session.userInfo.id, happn);
-    req.log("update detail entry", ret);
     res.json({ payload: "" });
   } catch (error) {
     req.log_error(error);

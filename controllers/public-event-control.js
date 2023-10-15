@@ -1,8 +1,8 @@
 const express = require("express");
 const pec = express.Router();
+const fs = require('fs');
 const { processed_file_path } = require('../variables_.js');
 const { user_input_letter_and_numbers_only, clean_up_uuid } = require('../str_filter.js');
-const fs = require('fs');
 const event_query = require('../queries/event-control.js');
 ///////////////////////////////////////////
 pec.get('/get_happn_by_id/:happn_id', async (req, res) => {
@@ -39,4 +39,4 @@ pec.get('/get_happn_image/:file_hash', async (req, res) => {
   }
 });
 /////////////////////////////////////////////////
-module.exports = pec
+module.exports = pec;

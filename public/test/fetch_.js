@@ -45,7 +45,7 @@ function fetch_post(url, fetchOptions, callback, method = 'POST') {
       callback(error);
     });
 }
-function fetch_patch(url, fetchOptions, callback, method = 'PATCH') {
+function fetch_put(url, fetchOptions, callback, method = 'PUT') {
   fetch_post(url, fetchOptions, callback, method);
 }
 ///////////////////////////////////////////////
@@ -79,12 +79,14 @@ function newHappn(formData, callback) {
     callback(res);
   });
 }
-function updateHappn(formData, callback) {
-  const body = { body: formData };
-  fetch_patch(`${API}/event/update_detail`, body, res => {
-    console.log(res);
-    callback(res);
-  });
+function updateHappn(jsonData, callback) {
+  fetch_put(
+    `${API}/event/update_detail`,
+    { body: JSON.stringify(jsonData) },
+    res => {
+      console.log(res);
+      callback(res);
+    });
 }
 function getHappnById(happnId, callback) {
   fetch_get(`${API}/event_public_access/get_happn_by_id/${happnId}`, res => {

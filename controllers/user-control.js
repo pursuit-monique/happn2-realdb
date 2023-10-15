@@ -34,7 +34,6 @@ uc.post('/login_by_third_party', async (req, res) => {
         third_party_login: 1
       }
       const ret = await create_third_party_user(newUserJson);
-      req.log(ret);
       if (ret !== false) {
         if (ret.status === 1) {
           //success

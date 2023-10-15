@@ -10,8 +10,8 @@ app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ type: "application/json", limit: "1mb" }));
 app.use(express.static("./public"));
 app.use((req, res, next) => {
-  req.log = (str) => { log(req.route, req.params, str) };
-  req.log_error = (str) => { log_error(req.route, req.params, str) };;
+  req.log = function () { log(req.route, ...arguments) };
+  req.log_error = function () { log_error(req.route, ...arguments) };
   next();
 })
 //middle ware/////////
