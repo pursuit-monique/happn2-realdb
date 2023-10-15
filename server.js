@@ -22,10 +22,10 @@ try {
   https_server.on('clientError', handle_client_error);
   http_server.on('clientError', handle_client_error);
 } catch (error) {
-  log_error(error);
+  req.log_error(error);
 }
 
 function handle_client_error(error, socket) {
-  // log_error('clientError:', error);
+  // req.log_error('clientError:', error);
   socket.destroy();  // This will destroy the socket
 }

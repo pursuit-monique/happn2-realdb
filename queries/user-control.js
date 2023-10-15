@@ -1,5 +1,7 @@
 const db = require("../db/db-config");
 const crypto = require('crypto');
+const { log_error, performance_timer } = require('../logs_.js');
+
 /////////////////////////////////////////////////////////////////
 const create_third_party_user = async (user_json) => {
   const [col_name, val_name] = [[], []];
@@ -13,7 +15,7 @@ const create_third_party_user = async (user_json) => {
     const ret = await db.one(`INSERT INTO "user" ("${col_name.join('", "')}") VALUES (${val_name.join(", ")}) ON CONFLICT (user_id) DO UPDATE SET last_seen = $[last_seen], ip_address = $[ip_address], current_session = $[current_session] RETURNING *`, user_json);
     return ret;
   } catch (error) {
-    console.error(error);
+    log_error(error);
     return false;
   }
 }

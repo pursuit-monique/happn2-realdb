@@ -8,15 +8,14 @@ const { processed_file_path, event_image_file_size_limit, event_json_size_limit,
 const upload = multer({
   dest: tmp_upload_file_path
 });
-const { log_error, log } = require('../logs_.js');
-const { create_new_event } = require('../queries/event-control.js');
+const { create_new_event, update_happn_detail } = require('../queries/event-control.js');
 if (!fs.existsSync(processed_file_path)) fs.mkdirSync(processed_file_path);
 ///////////////////////////////////////////////////////
 ec.get("/", async (req, res) => {
   try {
     res.json({ payload: "" });
   } catch (error) {
-    log_error(error);
+    req.log_error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -44,14 +43,14 @@ ec.post('/new', upload.any(), async (req, res) => {
       happn_detail.images.forEach((image, sub_idx) => {
         if (imagesRet[image.hash] === undefined && image.isUpload === false) {
           //if the frontend said the file is exist on our end, check filehash
-          if (!fs.existsSync(`${processed_file_path}/${image.hash}`)) {
+          if (!fs.existsSync(`${processed_file_path}${image.hash}`)) {
             throw new Error("uploaded file hash isn't match with uploaded JSON object.");
           }
         } else if (imagesRet[image.hash]) {
           //if front end sent a file, move the file to images dir
           fs.renameSync(
-            `${tmp_upload_file_path}/${path.parse(imagesRet[image.hash].path).base}`,
-            `${processed_file_path}/${image.hash}`
+            `${tmp_upload_file_path}${path.parse(imagesRet[image.hash].path).base}`,
+            `${processed_file_path}${image.hash}`
           );
         } else {
           //else remove the temporary file
@@ -62,11 +61,11 @@ ec.post('/new', upload.any(), async (req, res) => {
     });
     happnJson.imagesRet = imagesRet;
     //insert into db
-    const ret = await create_new_event(happnJson);
+    const ret = await create_new_event(happnJson, req.session.userInfo.id);
     //return it to frondend
     res.json({ payload: ret });
   } catch (error) {
-    log_error(error);
+    req.log_error(error);
     res.status(500).json({ error: error.message });
     //remove all uploaded file if error
     if (req.files?.length > 0) for (let file of req.files) {
@@ -78,11 +77,13 @@ ec.post('/new', upload.any(), async (req, res) => {
 ec.patch('update_detail', async (req, res) => {
   try {
     const { happn } = req.body;
-    console.log(happn);
+    req.log(happn);
 
+    // const ret = await update_happn_detail(happn.detailId, req.session.userInfo.id, happn);
+    req.log("update detail entry", ret);
     res.json({ payload: "" });
   } catch (error) {
-    log_error(error);
+    req.log_error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -116,7 +117,6 @@ function process_upload_images(file) {
       filename: '756535dd4b9bc81d0551dae1bad89faf',
       path: 'uploads/756535dd4b9bc81d0551dae1bad89faf',
       size: 5104
-      
     }
      */
     // const file_path = `${__dirname}/../${file.path}`;
@@ -146,7 +146,7 @@ function process_upload_images(file) {
     // }
     return { file_hash };
   } catch (error) {
-    log_error(error);
+    req.log_error(error);
     return false;
   }
 }

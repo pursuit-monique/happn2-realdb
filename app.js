@@ -9,6 +9,11 @@ set_debug_mode(true);
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ type: "application/json", limit: "1mb" }));
 app.use(express.static("./public"));
+app.use((req, res, next) => {
+  req.log = (str) => { log(req.route, req.params, str) };
+  req.log_error = (str) => { log_error(req.route, req.params, str) };;
+  next();
+})
 //middle ware/////////
 require('./session-config')(app);
 require('./controllers/load-language').getTranslation(app);
@@ -27,7 +32,7 @@ app.use('/public_access', public_access);
 app.use('/event_public_access', event_public_access);
 //error routing////////////////////////////////
 app.get("*", (req, res) => {
-  log_error("404", req.originalUrl);
+  req.log_error("404", req.originalUrl);
   const file_path = `${__dirname}/public/index.html`;
   if (fs.existsSync(file_path)) {
     res.sendFile(file_path);

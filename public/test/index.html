@@ -100,6 +100,14 @@
           const fileHash = document.querySelector("#happn_detail_image_file_hash_input").value;
           imageEl.src = `${window.location.origin}/event_public_access/get_happn_image/${fileHash}`
           break;
+        case "update a happn with happn detail id":
+          const happn_detail_id = document.querySelector("#happn_detail_update_id_input").value;
+          const update_content = document.querySelector("#happn_detail_update_content_input").value;
+          const update_key = document.querySelector("#happn_detail_update_key_select").value;
+          srv.updateHappn({ [update_key]: update_content, happn_detail_id }, res => {
+            console.log(res);
+          });
+          break;
       }
     }
     ///
@@ -139,16 +147,18 @@
           <img id="happn_detail_image_display" src="" alt="image for happn" />
         </li>
         <li>
-          <button>aaa</button>
-          <select>
-            <option>lat</option>
-            <option>lng</option>
-            <option>extra_info</option>
-            <option>status</option>
-            <option>start_time</option>
-            <option>end_time</option>
-            <option>description</option>
+          <button name="update a happn with happn detail id">update a happn with happn detail id</button>
+          <input id="happn_detail_update_id_input" type="text" />
+          <select id="happn_detail_update_key_select">
+            <option value="lat">lat</option>
+            <option value="lng">lng</option>
+            <option value="extra_info">extra_info</option>
+            <option value="status">status</option>
+            <option value="start_time">start_time</option>
+            <option value="end_time">end_time</option>
+            <option value="description">description</option>
           </select>
+          <input id="happn_detail_update_content_input" type="text" />
         </li>
       </ol>
     </div>

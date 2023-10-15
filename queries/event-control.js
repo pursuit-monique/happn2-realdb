@@ -19,7 +19,6 @@ const happen_detail_template_to_save_ = () => ({
   "creator": 50,
   "description": 1000
 })
-
 const detail_image_template_to_save_ = () => ({
   "file_hash": 260,
   "timestamp": 50,
@@ -53,14 +52,14 @@ const detail_image_template_to_show_ = () => ({
   "size": "number"
 })
 /////////////////////////////////////////////////
-const create_new_event = async (happnJson) => {
+const create_new_event = async (happnJson, current_user_id) => {
   const happen_t_to_save = happen_template_to_save_();
   const detail_t_to_save = happen_detail_template_to_save_();
   const image_t_to_save = detail_image_template_to_save_();
   const detail_t_to_show = happen_detail_template_to_show_();
   const image_t_to_show = detail_image_template_to_show_();
   //performance logger
-  const pt = new performance_timer();
+  const pt = new performance_timer("event - new event");
   //draw an connection from the pool
   const connection = await db.connect();
   try {
@@ -90,7 +89,6 @@ const create_new_event = async (happnJson) => {
           string_arr.push("'" + filter_value(item[key], detail_t_to_save[key]) + "'");
         }
         //re-organize and vaild the images data
-
         const images_arr = [];
         for (let image of item.images) {
           image.file_hash = image.hash;
@@ -140,7 +138,7 @@ const create_new_event = async (happnJson) => {
 
 const get_happn_by_id = async (happn_id) => {
   //performance logger
-  const pt = new performance_timer();
+  const pt = new performance_timer("event - get_happn_by_id");
   //draw an connection from the pool
   const connection = await db.connect();
   try {
@@ -149,9 +147,7 @@ const get_happn_by_id = async (happn_id) => {
     const detail_ret = await get_happn_detail_by_happn_id_t(happn_ret.id, connection);
     const detail_ret_list = detail_ret.map(el => el.id);
     const images_ret = await get_happn_detail_images_by_happn_detail_id_t(detail_ret_list, connection);
-
     return { happn_ret, detail_ret, images_ret };
-
   } catch (error) {
     log_error(error);
     return {};
@@ -160,7 +156,33 @@ const get_happn_by_id = async (happn_id) => {
     if (connection) connection.done();
   }
 }
-
+const update_happn_detail = async (happn_detail_id, current_user_id, update_json) => {
+  //performance logger
+  const pt = new performance_timer("event - get_happn_by_id");
+  const detail_t_to_save = happen_detail_template_to_save_();
+  try {
+    //re-organize data
+    const clean_data = {};
+    for (let key in detail_t_to_save) if (update_json[key]) {
+      clean_data[key] = filter_value(update_json[key], detail_t_to_save[key]);
+    }
+    if (Object.values(clean_data).length === 0) throw new Error("insert object is empty.");
+    const connection = await db.connect();
+    const ret = await connection.tx(async t => {
+      const detail_ret = t.one(`UPDATE happen_detail SET ${Object.key(clean_data).join(",")} = '${Object.values(clean_data).join("','")}' WHERE id = $[happn_detail_id] AND creator = $[current_user_id]`);
+      return detail_ret;
+    })
+    req.log(ret);
+    return ret;
+  } catch (error) {
+    log_error(error);
+    return false;
+  } finally {
+    pt.done();
+    if (connection) connection.done();
+  }
+}
+/////////////////////////////////////////////////
 const get_happn_by_id_t = async (happn_id, transaction = db) => {
   try {
     const ret = await transaction.one(`SELECT * FROM happen WHERE id = $[happn_id]`, { happn_id });
@@ -208,8 +230,8 @@ function filter_value(val, filter) {
       //remove \ and ' from string
       return val.slice(0, filter).replace('\\', "").replace("'", "\'");
     default:
-      console.log("event-control-filter-value default", typeof filter);
+      req.log(typeof filter);
       return val;
   }
 }
-module.exports = { create_new_event, get_happn_by_id }
+module.exports = { create_new_event, get_happn_by_id, update_happn_detail }
