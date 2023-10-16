@@ -1,5 +1,5 @@
 const db = require("../db/db-config");
-const { log_error, performance_timer } = require('../logs_.js');
+const { log, log_error, performance_timer } = require('../logs_.js');
 const { clean_up_uuid } = require('../str_filter');
 ////////////////////////////////////////////////
 function happen_template_to_save_() {
@@ -160,6 +160,8 @@ const update_happn_detail = async (happn_detail_id, current_user_id, update_json
   //performance logger
   const pt = new performance_timer("event - get_happn_by_id");
   const detail_t_to_save = happen_detail_template_to_save_();
+  const detail_t_to_show = happen_detail_template_to_show_();
+  const connection = await db.connect();
   try {
     //re-organize data
     const clean_data = {};
@@ -167,12 +169,18 @@ const update_happn_detail = async (happn_detail_id, current_user_id, update_json
       clean_data[key] = filter_value(update_json[key], detail_t_to_save[key]);
     }
     if (Object.values(clean_data).length === 0) throw new Error("insert object is empty.");
-    const connection = await db.connect();
+    const key_value_pairs = Object.keys(clean_data).map(key => `${key} = '${clean_data[key]}'`).join(",");
+
     const ret = await connection.tx(async t => {
-      const detail_ret = t.one(`UPDATE happen_detail SET ${Object.key(clean_data).join(",")} = '${Object.values(clean_data).join("','")}' WHERE id = $[happn_detail_id] AND creator = $[current_user_id]`);
+      const detail_ret = t.one(`UPDATE happen_detail 
+        SET ${key_value_pairs} 
+        WHERE id = $[happn_detail_id] AND creator = $[current_user_id] 
+        RETURNING ${Object.keys(detail_t_to_show).join(",")}`,
+        { happn_detail_id, current_user_id }
+      );
       return detail_ret;
     })
-    req.log(ret);
+
     return ret;
   } catch (error) {
     log_error(error);

@@ -78,9 +78,10 @@ ec.put('/update_detail/:happn_detail_id', async (req, res) => {
   try {
     const { happn_detail_id } = req.params;
     const { happn_detail } = req.body;
-    req.log(happn_detail, happn_detail_id);
 
-    // const ret = await update_happn_detail(happn.detailId, req.session.userInfo.id, happn);
+    const ret = await update_happn_detail(happn_detail_id, req.session.userInfo.id, happn_detail);
+    req.log(ret);
+
     res.json({ payload: "" });
   } catch (error) {
     req.log_error(error);

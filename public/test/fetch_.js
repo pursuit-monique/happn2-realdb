@@ -83,10 +83,7 @@ function updateHappn(happn_detail_id, jsonData, callback) {
   fetch_put(
     `${API}/event/update_detail/${happn_detail_id}`,
     { body: JSON.stringify(jsonData) },
-    res => {
-      console.log(res);
-      callback(res);
-    });
+    res => callback(res));
 }
 function getHappnById(happnId, callback) {
   fetch_get(`${API}/event_public_access/get_happn_by_id/${happnId}`, res => {
