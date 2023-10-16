@@ -79,9 +79,9 @@ function newHappn(formData, callback) {
     callback(res);
   });
 }
-function updateHappn(jsonData, callback) {
+function updateHappn(happn_detail_id, jsonData, callback) {
   fetch_put(
-    `${API}/event/update_detail`,
+    `${API}/event/update_detail/${happn_detail_id}`,
     { body: JSON.stringify(jsonData) },
     res => {
       console.log(res);

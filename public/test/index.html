@@ -84,6 +84,7 @@
             ]
           }));
           console.log("newHappn form data", formData);
+
           srv.newHappn(formData, res => {
             console.log("newHappn result", res);
           });
@@ -91,6 +92,7 @@
         case "view an happn/ event":
           const happnId = document.querySelector("#happn_id_input_for_viewing").value;
           console.log("requesting happn id", happnId);
+
           srv.getHappnById(happnId, res => {
             console.log("getHappnById result", res);
           })
@@ -98,13 +100,15 @@
         case "view a image by file hash":
           const imageEl = document.querySelector("#happn_detail_image_display");
           const fileHash = document.querySelector("#happn_detail_image_file_hash_input").value;
+
           imageEl.src = `${window.location.origin}/event_public_access/get_happn_image/${fileHash}`
           break;
         case "update a happn with happn detail id":
           const happn_detail_id = document.querySelector("#happn_detail_update_id_input").value;
           const update_content = document.querySelector("#happn_detail_update_content_input").value;
           const update_key = document.querySelector("#happn_detail_update_key_select").value;
-          srv.updateHappn({ happn_detail: { [update_key]: update_content }, happn_detail_id }, res => {
+
+          srv.updateHappn(happn_detail_id, { happn_detail: { [update_key]: update_content } }, res => {
             console.log(res);
           });
           break;

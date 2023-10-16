@@ -24,7 +24,6 @@ pec.get('/get_happn_by_id/:happn_id', async (req, res) => {
 
 pec.get('/get_happn_image/:file_hash', async (req, res) => {
   try {
-    req.log("hello");
     let { file_hash } = req.params;
     const file_path = processed_file_path + user_input_letter_and_numbers_only(file_hash);
     if (fs.existsSync(file_path)) {

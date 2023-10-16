@@ -1,8 +1,8 @@
 var debug_mode = true;
+
 function log_error() {
   if (debug_mode) console.error(new Date().toLocaleString(), ...arguments);
 }
-
 function log() {
   if (debug_mode) console.log(new Date().toLocaleString(), ...arguments);
 }
@@ -23,10 +23,11 @@ class performance_timer {
   done() {
     if (!debug_mode) return;
     this.add_tick("ending");
-    console.log(this.checkpoint);
+    log(this.checkpoint);
   }
 }
 function set_debug_mode(bool) {
   debug_mode = bool;
 }
+//////////////////////////////////////////////////
 module.exports = { log_error, log, performance_timer, set_debug_mode };
