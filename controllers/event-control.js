@@ -88,6 +88,17 @@ ec.put('/update_detail/:happn_detail_id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+ec.put('/update_detail_images/:happn_detail_id', upload.any(), async (req, res) => {
+  try {
+    const { happn_detail_id } = req.params;
+    req.log(happn_detail_id);
+    res.json({ payload: "" });
+  } catch (error) {
+    req.log_error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 ///////////////////////////////////////////////////////
 function remove_file_from_local() {
 

@@ -156,6 +156,7 @@ const get_happn_by_id = async (happn_id) => {
     if (connection) connection.done();
   }
 }
+
 const update_happn_detail = async (happn_detail_id, current_user_id, update_json) => {
   //performance logger
   const pt = new performance_timer("event - get_happn_by_id");
@@ -242,4 +243,10 @@ function filter_value(val, filter) {
       return val;
   }
 }
+/*////////////////////////////////////////////
+happn/ happn detail status code definition:
+  -1 = deleted
+  0 = normal
+  1 = hidden
+/*//////////////////////////////////////////
 module.exports = { create_new_event, get_happn_by_id, update_happn_detail }
