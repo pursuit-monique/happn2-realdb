@@ -79,11 +79,20 @@ function newHappn(formData, callback) {
     callback(res);
   });
 }
-function updateHappn(happn_detail_id, jsonData, callback) {
+function updateHappnDetail(happn_detail_id, jsonData, callback) {
   fetch_put(
     `${API}/event/update_detail/${happn_detail_id}`,
     { body: JSON.stringify(jsonData) },
-    res => callback(res));
+    res => callback(res)
+  );
+}
+function replaceHappnDetailImages(happn_detail_id, formData, callback) {
+  const body = { body: formData, headers: { "Content-Type": "delete" }, };
+  fetch_put(
+    `${API}/event/update_detail_images/${happn_detail_id}`,
+    body,
+    res => callback(res)
+  );
 }
 function getHappnById(happnId, callback) {
   fetch_get(`${API}/event_public_access/get_happn_by_id/${happnId}`, res => {
@@ -102,7 +111,8 @@ export default {
   logout,
   //happn/event//////////
   newHappn,
-  updateHappn,
+  updateHappnDetail,
+  replaceHappnDetailImages,
   getHappnById,
   checkImageExist
 }

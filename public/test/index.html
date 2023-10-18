@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happn backend function demo</title>
+  <title>Happn front/ backend function demo</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <script type="module" defer>
     import srv from './fetch_.js';
@@ -58,17 +58,11 @@
           break;
         ///event related///////////////////
         case "add an new happn/ event":
-          const imageFiles = document.querySelector("#new_happn_images").files;
+          let imageFiles = document.querySelector("#new_happn_images").files;
 
           const formData = new FormData();
-          const imagesHash = [];
-          for (let file of imageFiles) {
-            const { hash, name, size, type, isUpload } = file;
-            imagesHash.push({ hash, name, size, type, isUpload });
-            if (file.isUpload) {
-              formData.append("files", file);
-            }
-          }
+          const imagesHash = filesToHashArray(imageFiles);
+
           formData.append("happn", JSON.stringify({
             name: "test event name",
             description: "testing description",
@@ -108,13 +102,30 @@
           const update_content = document.querySelector("#happn_detail_update_content_input").value;
           const update_key = document.querySelector("#happn_detail_update_key_select").value;
 
-          srv.updateHappn(happn_detail_id, { happn_detail: { [update_key]: update_content } }, res => {
+          srv.updateHappnDetail(happn_detail_id, { happn_detail: { [update_key]: update_content } }, res => {
             console.log(res);
           });
           break;
+        case "replace detail images by id":
+          let imageFilesForReplace = document.querySelector("#replace_detail_images_file_input").files;
+          const imagesHashForReplace = filesToHashArray(imageFiles);
+          const formDataForReplace = new FormData();
+          formDataForReplace.append("images", JSON.stringify({ imagesHash }));
+          break;
       }
     }
-    ///
+    //hepler functions/
+    function filesToHashArray(imageFiles) {
+      const imagesHash = [];
+      for (let file of imageFiles) {
+        const { hash, name, size, type, isUpload } = file;
+        imagesHash.push({ hash, name, size, type, isUpload });
+        if (file.isUpload) {
+          formData.append("files", file);
+        }
+      }
+      return imagesHash;
+    }
   </script>
   <style>
     ol>li {
@@ -163,6 +174,10 @@
             <option value="description" selected>description</option>
           </select>
           <input id="happn_detail_update_content_input" type="text" value="test description" />
+        </li>
+        <li>
+          <button name="replace detail images by id">replace detail images by id</button>
+          <input id="replace_detail_images_file_input" type="file" multiple accept="image/*" />
         </li>
       </ol>
     </div>

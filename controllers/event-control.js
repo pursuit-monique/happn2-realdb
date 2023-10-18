@@ -92,7 +92,12 @@ ec.put('/update_detail/:happn_detail_id', async (req, res) => {
 ec.put('/update_detail_images/:happn_detail_id', upload.any(), async (req, res) => {
   try {
     const { happn_detail_id } = req.params;
-    req.log(happn_detail_id);
+    const imagesRet = {};
+    if (req.files?.length > 0) for (let file of req.files) {
+      const ret = process_upload_images(file);
+      if (ret) imagesRet[ret.file_hash] = file;
+    }
+    req.log(imagesRet);
     res.json({ payload: "" });
   } catch (error) {
     req.log_error(error);

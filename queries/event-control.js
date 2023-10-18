@@ -17,7 +17,8 @@ const happen_detail_template_to_save_ = () => ({
   "start_time": 50,
   "end_time": 50,
   "creator": 50,
-  "description": 1000
+  "description": 1000,
+  "lasest_update": 50
 })
 const detail_image_template_to_save_ = () => ({
   "file_hash": 260,
@@ -42,7 +43,8 @@ const happen_detail_template_to_show_ = () => ({
   "creator": "",
   "start_time": "",
   "end_time": "",
-  "description": ""
+  "description": "",
+  "lasest_update": ""
 })
 const detail_image_template_to_show_ = () => ({
   "file_hash": 260,
@@ -84,6 +86,7 @@ const create_new_event = async (happnJson, current_user_id) => {
       for (let item of happnDetail) {
         item.happn_id = happn.id;
         item.creator = happn.creator;
+        item.lasest_update = current_date;
         const string_arr = [];
         for (let key in detail_t_to_save) {
           string_arr.push("'" + filter_value(item[key], detail_t_to_save[key]) + "'");
@@ -165,6 +168,7 @@ const update_happn_detail = async (happn_detail_id, current_user_id, update_json
   const connection = await db.connect();
   try {
     //re-organize data
+    update_json['lasest_update'] = new Date().toUTCString();
     const clean_data = {};
     for (let key in detail_t_to_save) if (update_json[key]) {
       clean_data[key] = filter_value(update_json[key], detail_t_to_save[key]);
