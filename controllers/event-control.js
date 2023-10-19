@@ -8,7 +8,7 @@ const { processed_file_path, event_image_file_size_limit, event_json_size_limit,
 const upload = multer({
   dest: tmp_upload_file_path
 });
-const { create_new_event, update_happn_detail } = require('../queries/event-control.js');
+const { create_new_event, update_happn_detail, replace_happn_detail_images } = require('../queries/event-control.js');
 if (!fs.existsSync(processed_file_path)) fs.mkdirSync(processed_file_path);
 ///////////////////////////////////////////////////////
 ec.get("/", async (req, res) => {
@@ -34,7 +34,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     //files
     const imagesRet = {};
     if (req.files?.length > 0) for (let file of req.files) {
-      const ret = process_upload_images(file);
+      const ret = process_upload_images_hash(file);
       if (ret) imagesRet[ret.file_hash] = file;
     }
 
@@ -43,7 +43,7 @@ ec.post('/new', upload.any(), async (req, res) => {
       happn_detail.images.forEach((image, sub_idx) => {
         if (imagesRet[image.hash] === undefined && image.isUpload === false) {
           //if the frontend said the file is exist on our end, check filehash
-          if (!fs.existsSync(`${processed_file_path}${image.hash}`)) {
+          if (!check_images_exist_by_hash(image.hash)) {
             throw new Error("uploaded file hash isn't match with uploaded JSON object.");
           }
         } else if (imagesRet[image.hash]) {
@@ -89,16 +89,45 @@ ec.put('/update_detail/:happn_detail_id', async (req, res) => {
   }
 });
 
-ec.put('/update_detail_images/:happn_detail_id', upload.any(), async (req, res) => {
+ec.put('/replace_detail_images/:happn_detail_id', upload.any(), async (req, res) => {
   try {
     const { happn_detail_id } = req.params;
+    const detail_images_meta = JSON.parse(req.body.detail_images_meta);
     const imagesRet = {};
+
+    //if the request attached files, it should appear in the imagesRet
     if (req.files?.length > 0) for (let file of req.files) {
-      const ret = process_upload_images(file);
+      const ret = process_upload_images_hash(file);
       if (ret) imagesRet[ret.file_hash] = file;
     }
-    req.log(imagesRet);
-    res.json({ payload: "" });
+    const ready_to_insert_images = [];
+    for (let meta of detail_images_meta) {
+      //if this hash is not uploading,
+      if (!imagesRet[meta["hash"]]) {
+        //if this hash is not exist in happn-images folder
+        if (!check_images_exist_by_hash(meta["hash"])) {
+          //ignore
+          continue;
+        }
+      }
+      //add to insert
+      ready_to_insert_images.push({
+        file_hash: meta.hash,
+        originalname: meta.name,
+        size: meta.size,
+        mimetype: meta.type
+      });
+    }
+    const ret = await replace_happn_detail_images(happn_detail_id, req.session.userInfo.id, ready_to_insert_images);
+    //if successfully update the happn detail we should move the attached files back to happn-images folder
+    if (ret) for (let hash in imagesRet) {
+      //if put the files to happn-images
+      fs.renameSync(
+        `${tmp_upload_file_path}${path.parse(imagesRet[hash].path).base}`,
+        `${processed_file_path}${hash}`
+      );
+    }
+    res.json({ payload: ret });
   } catch (error) {
     req.log_error(error);
     res.status(500).json({ error: error.message });
@@ -107,6 +136,9 @@ ec.put('/update_detail_images/:happn_detail_id', upload.any(), async (req, res) 
 ///////////////////////////////////////////////////////
 function remove_file_from_local() {
 
+}
+function check_images_exist_by_hash(hash) {
+  return fs.existsSync(`${processed_file_path}${hash}`);
 }
 function read_file_content_from_request_file(file) {
   let file_content = undefined;
@@ -122,7 +154,7 @@ function read_file_content_from_request_file(file) {
   return { file_content, file_path };
 }
 ///////////////////////////////////////////////////////
-function process_upload_images(file) {
+function process_upload_images_hash(file) {
   try {
     /** example of file
      * {
@@ -152,15 +184,8 @@ function process_upload_images(file) {
       throw new Error('Only images are allowed');
     }
     //create file hash
-
     const file_hash = crypto.createHash('sha256').update(file_content).digest('hex');
-    //Processing file, if exists just delete the uploaded file
-    // if (fs.existsSync(`${processed_file_path}/${file_hash}`)) {
-    //   fs.unlinkSync(file_path.replace(/../g, ''));
-    // } 
-    // else {
-    //   fs.renameSync(file_path.replace(/../g, ''), `${processed_file_path}/${file_hash}`);
-    // }
+
     return { file_hash };
   } catch (error) {
     req.log_error(error);

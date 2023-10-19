@@ -195,6 +195,49 @@ const update_happn_detail = async (happn_detail_id, current_user_id, update_json
     if (connection) connection.done();
   }
 }
+
+const replace_happn_detail_images = async (happn_detail_id, current_user_id, images_json) => {
+  //performance logger
+  const pt = new performance_timer("event - replace happn detail images");
+  //draw an connection from the pool
+  const connection = await db.connect();
+  const detail_image_t_to_save = detail_image_template_to_save_();
+  try {
+    ////re-organize and vaild the images data
+    const ready_to_insert_images = [];
+    for (let image of images_json) {
+      const image_obj = {
+        timestamp: new Date().toUTCString(),
+        "happen_detail_id": happn_detail_id
+      };
+      for (let key in detail_image_t_to_save) {
+        if (image[key]) image_obj[key] = filter_value(image[key], detail_image_t_to_save[key]);
+      }
+      ready_to_insert_images.push(image_obj);
+    }
+    pt.add_tick("ready to insert");
+    const ret = await connection.tx(async t => {
+      //need to check this detail is belong to the user id
+      const happn_detail = t.oneOrNone(`SELECT id FROM happen_detail WHERE creator = $[current_user_id] AND id = $[happn_detail_id]`, { happn_detail_id, current_user_id });
+      pt.add_tick("in validation");
+      if (!happn_detail) return false;
+
+      await t.none(`DELETE FROM happen_detail_images WHERE happen_detail_id = $[happn_detail_id];`, { happn_detail_id, current_user_id });
+
+      pt.add_tick("after delete");
+
+      return await Promise.all(ready_to_insert_images.map(async el => t.one(`INSERT INTO happen_detail_images (${Object.keys(el).join(",")}) VALUES($[${Object.keys(el).join("],$[")}]) RETURNING ${Object.keys(detail_image_template_to_show_()).join(",")}`, el)));
+    })
+
+    return ret;
+  } catch (error) {
+    log_error(error);
+    return false;
+  } finally {
+    pt.done();
+    if (connection) connection.done();
+  }
+}
 /////////////////////////////////////////////////
 const get_happn_by_id_t = async (happn_id, transaction = db) => {
   try {
@@ -253,4 +296,4 @@ happn/ happn detail status code definition:
   0 = normal
   1 = hidden
 /*//////////////////////////////////////////
-module.exports = { create_new_event, get_happn_by_id, update_happn_detail }
+module.exports = { create_new_event, get_happn_by_id, update_happn_detail, replace_happn_detail_images }

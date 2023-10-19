@@ -89,7 +89,7 @@ function updateHappnDetail(happn_detail_id, jsonData, callback) {
 function replaceHappnDetailImages(happn_detail_id, formData, callback) {
   const body = { body: formData, headers: { "Content-Type": "delete" }, };
   fetch_put(
-    `${API}/event/update_detail_images/${happn_detail_id}`,
+    `${API}/event/replace_detail_images/${happn_detail_id}`,
     body,
     res => callback(res)
   );
