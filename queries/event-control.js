@@ -1,7 +1,17 @@
 const db = require("../db/db-config");
 const { log, log_error, performance_timer } = require('../logs_.js');
 const { clean_up_uuid } = require('../str_filter');
+/**
+ * 
+  happen_detail status defination
+  status 
+  -1 = mark as delete
+   1 = normal (update able by user)
+   2 = hidden (update able by user)
+   3 = locked by admin
+ */
 ////////////////////////////////////////////////
+
 function happen_template_to_save_() {
   return {
     'name': 50,
@@ -179,7 +189,7 @@ const update_happn_detail = async (happn_detail_id, current_user_id, update_json
     const ret = await connection.tx(async t => {
       const detail_ret = t.one(`UPDATE happen_detail 
         SET ${key_value_pairs} 
-        WHERE id = $[happn_detail_id] AND creator = $[current_user_id] 
+        WHERE id = $[happn_detail_id] AND creator = $[current_user_id] AND status IN (1, 2)
         RETURNING ${Object.keys(detail_t_to_show).join(",")}`,
         { happn_detail_id, current_user_id }
       );
@@ -218,7 +228,7 @@ const replace_happn_detail_images = async (happn_detail_id, current_user_id, ima
     pt.add_tick("ready to insert");
     const ret = await connection.tx(async t => {
       //need to check this detail is belong to the user id
-      const happn_detail = t.oneOrNone(`SELECT id FROM happen_detail WHERE creator = $[current_user_id] AND id = $[happn_detail_id]`, { happn_detail_id, current_user_id });
+      const happn_detail = await t.oneOrNone(`SELECT id FROM happen_detail WHERE creator = $[current_user_id] AND id = $[happn_detail_id] AND status IN (1, 2);`, { happn_detail_id, current_user_id });
       pt.add_tick("in validation");
       if (!happn_detail) return false;
 
@@ -257,11 +267,13 @@ const get_happn_detail_by_happn_id_t = async (happn_id, transaction = db) => {
     return [];
   }
 }
-const get_happn_detail_by_id_t = (happn_detail_id, transaction = db) => {
+const get_happn_detail_by_id_t = (happn_detail_id, transaction = db, returning_field = Object.key(happen_detail_template_to_show_())) => {
   try {
+    return transaction.oneOrNone(`SELECT ${returning_field.join(',')} FROM happen_detail WHERE id = $[happn_detail_id];`, { happn_detail_id });
 
   } catch (error) {
-
+    log_error(error);
+    return false;
   }
 }
 

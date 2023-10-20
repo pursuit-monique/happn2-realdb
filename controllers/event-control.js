@@ -126,7 +126,7 @@ ec.put('/replace_detail_images/:happn_detail_id', upload.any(), async (req, res)
         `${tmp_upload_file_path}${path.parse(imagesRet[hash].path).base}`,
         `${processed_file_path}${hash}`
       );
-    }
+    } else throw new Error(`happn detail id ${happn_detail_id} replace failed.`);
     res.json({ payload: ret });
   } catch (error) {
     req.log_error(error);
