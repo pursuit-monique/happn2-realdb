@@ -86,6 +86,7 @@ function updateHappnDetail(happn_detail_id, jsonData, callback) {
     res => callback(res)
   );
 }
+
 function replaceHappnDetailImages(happn_detail_id, formData, callback) {
   const body = { body: formData, headers: { "Content-Type": "delete" }, };
   fetch_put(
@@ -94,11 +95,18 @@ function replaceHappnDetailImages(happn_detail_id, formData, callback) {
     res => callback(res)
   );
 }
+
 function getHappnById(happnId, callback) {
   fetch_get(`${API}/event_public_access/get_happn_by_id/${happnId}`, res => {
     callback(res);
   })
 }
+
+function getHappnDetailByIds(ids, callback) {
+  const body = { body: JSON.stringify(ids) }
+  fetch_post(`${API}/event_public_access/get_happns_by_ids`, body, callback);
+}
+
 function checkImageExist(fileHash, callback) {
   fetch_get(`${API}/public_access/check_image_exist/${fileHash}`, res => {
     callback(res);
@@ -114,5 +122,6 @@ export default {
   updateHappnDetail,
   replaceHappnDetailImages,
   getHappnById,
-  checkImageExist
+  checkImageExist,
+  getHappnDetailByIds
 }

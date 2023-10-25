@@ -57,6 +57,7 @@ const happen_detail_template_to_show_ = () => ({
   "lasest_update": ""
 })
 const detail_image_template_to_show_ = () => ({
+  "happen_detail_id": 260,
   "file_hash": 260,
   "timestamp": 50,
   "originalname": 100,
@@ -156,7 +157,7 @@ const get_happn_by_id = async (happn_id) => {
   const connection = await db.connect();
   try {
     const happn_ret = await get_happn_by_id_t(happn_id, connection);
-    if (happn_ret.id === undefined) return happn_ret;
+    if (happn_ret === null) return false;
     const detail_ret = await get_happn_detail_by_happn_id_t(happn_ret.id, connection);
     const detail_ret_list = detail_ret.map(el => el.id);
     const images_ret = await get_happn_detail_images_by_happn_detail_id_t(detail_ret_list, connection);
@@ -184,6 +185,7 @@ const update_happn_detail = async (happn_detail_id, current_user_id, update_json
       clean_data[key] = filter_value(update_json[key], detail_t_to_save[key]);
     }
     if (Object.values(clean_data).length === 0) throw new Error("insert object is empty.");
+
     const key_value_pairs = Object.keys(clean_data).map(key => `${key} = '${clean_data[key]}'`).join(",");
 
     const ret = await connection.tx(async t => {
@@ -248,10 +250,48 @@ const replace_happn_detail_images = async (happn_detail_id, current_user_id, ima
     if (connection) connection.done();
   }
 }
+
+const get_happn_details_by_ids = async (id_array) => {
+  // sanitize user input
+  if (!Array.isArray(id_array)) return false;
+  id_array = id_array.map(el => clean_up_uuid(el));
+
+  const ret = await genenal_query_procedure(async (connection) => {
+    return await connection.tx(async t => {
+
+      const detail_ret = await t.manyOrNone(`SELECT ${Object.keys(happen_detail_template_to_show_()).join(",")} FROM happen_detail WHERE id in ('${id_array.join("','")}')`);
+
+      if (detail_ret === false) return false;
+      const images_ret = await t.manyOrNone(`SELECT ${Object.keys(detail_image_template_to_show_()).join(",")} FROM happen_detail_images WHERE happen_detail_id in ('${id_array.join("','")}')`);
+
+      return { detail_ret, images_ret };
+    })
+  })
+  return ret;
+}
 /////////////////////////////////////////////////
+async function genenal_query_procedure(mission) {
+  const pt = new performance_timer(`event - ${mission.toString()}`);
+  //draw an connection from the pool
+  const connection = await db.connect();
+
+  try {
+    pt.add_tick("start mission");
+
+    const ret = mission(connection, pt);
+    pt.add_tick("end mission");
+    return ret;
+  } catch (error) {
+    log_error(error);
+    return false;
+  } finally {
+    pt.done();
+    if (connection) connection.done();
+  }
+}
 const get_happn_by_id_t = async (happn_id, transaction = db) => {
   try {
-    const ret = await transaction.one(`SELECT * FROM happen WHERE id = $[happn_id]`, { happn_id });
+    const ret = await transaction.oneOrNone(`SELECT * FROM happen WHERE id = $[happn_id]`, { happn_id });
     return ret;
   } catch (error) {
     log_error(error);
@@ -308,4 +348,10 @@ happn/ happn detail status code definition:
   0 = normal
   1 = hidden
 /*//////////////////////////////////////////
-module.exports = { create_new_event, get_happn_by_id, update_happn_detail, replace_happn_detail_images }
+module.exports = {
+  create_new_event,
+  get_happn_by_id,
+  update_happn_detail,
+  replace_happn_detail_images,
+  get_happn_details_by_ids
+}

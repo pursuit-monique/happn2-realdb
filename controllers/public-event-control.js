@@ -9,6 +9,7 @@ pec.get('/get_happn_by_id/:happn_id', async (req, res) => {
   try {
     const happn_id = clean_up_uuid(req.params.happn_id);
     const { happn_ret, detail_ret, images_ret } = await event_query.get_happn_by_id(happn_id);
+    if (happn_ret === undefined) throw new Error(`happen Id ${happn_id} not found.`);
     res.json({
       "payload": {
         "happn": happn_ret,
@@ -16,6 +17,26 @@ pec.get('/get_happn_by_id/:happn_id', async (req, res) => {
         "detail": detail_ret
       }
     });
+  } catch (error) {
+    req.log_error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+pec.post('/get_happns_by_ids', async (req, res) => {
+  try {
+    const ids = req.body;
+    const ret = await event_query.get_happn_details_by_ids(ids);
+    res.json({ payload: ret });
+  } catch (error) {
+    req.log_error(error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+pec.get('/latest_happen', async (req, res) => {
+  try {
+
   } catch (error) {
     req.log_error(error);
     res.status(500).json({ error: error.message });

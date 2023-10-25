@@ -118,6 +118,18 @@
             console.log("replaceHappnDetailImages", res);
           });
           break;
+        case "get Happen Detail By Ids": {
+          const ids = document.querySelector("#getHappenDetailByIds_input").value.split(",").map(el => el.trim());
+          console.log(ids);
+          srv.getHappnDetailByIds(ids, res => {
+            console.log(res);
+          })
+        }
+        case "get the latest set of happen": {
+          const latest_happen_ol = document.querySelector("#latest_happen_ol");
+
+        }
+        default: console.log("here is switch default")
       }
     }
     //hepler functions/
@@ -188,6 +200,15 @@
           happn detail id: <input type="text" id="replace_detail_images_detail_id_input"
             value="010a5b27-7d48-4dd8-aa0e-89811a303fc9" />
           <input id="replace_detail_images_file_input" type="file" multiple accept="image/*" />
+        </li>
+        <li>
+          <button name="get Happen Detail By Ids">get Happen Detail By Ids</button>
+          <input type="text" id="getHappenDetailByIds_input"
+            value="23d25f79-de87-40af-9174-6ce0fb986bc2, 010a5b27-7d48-4dd8-aa0e-89811a303fc9" />
+        </li>
+        <li>
+          <button name="get the latest set of happen">get the latest set of happen</button>
+          <ol id="latest_happen_ol"></ol>
         </li>
       </ol>
     </div>
