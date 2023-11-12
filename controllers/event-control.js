@@ -49,7 +49,7 @@ ec.post('/new', upload.any(), async (req, res) => {
         } else if (imagesRet[image.hash]) {
           //if front end sent a file, move the file to images dir
           fs.renameSync(
-            `${tmp_upload_file_path}${path.parse(imagesRet[image.hash].path).base}`,
+            path.join(tmp_upload_file_path, path.parse(imagesRet[image.hash].path).base),
             `${processed_file_path}${image.hash}`
           );
         } else {
@@ -69,7 +69,7 @@ ec.post('/new', upload.any(), async (req, res) => {
     res.status(500).json({ error: error.message });
     //remove all uploaded file if error
     if (req.files?.length > 0) for (let file of req.files) {
-      if (file.path) fs.unlinkSync(tmp_upload_file_path + path.parse(file.path).base);
+      if (file.path) fs.unlinkSync(path.join(tmp_upload_file_path, path.parse(file.path).base));
     }
   }
 });
@@ -146,7 +146,7 @@ function read_file_content_from_request_file(file) {
 
   if (file.path) {
     //if file have a path
-    file_path = `${tmp_upload_file_path}${path.parse(file.path).base}`;
+    file_path = path.join(tmp_upload_file_path, path.parse(file.path).base);
     file_content = fs.readFileSync(file_path);
   } else {
     file_content = file.buffer;
@@ -192,14 +192,6 @@ function process_upload_images_hash(file) {
     return false;
   }
 }
-///////////////////////////////////////////////////////
-function genenal_procedure(req, res, fn) {
-  try {
 
-  } catch (error) {
-    req.log_error(error);
-
-  }
-}
 ///////////////////////////////////////////////////////
 module.exports = ec;
