@@ -1,16 +1,15 @@
 const express = require("express");
 const crypto = require('crypto');
 const uc = express.Router();
-const str_filter = require('../str_filter');
+const _str_filter_ = require('../_str_filter_');
 const { verifyIdToken } = require("../firebase_");
-const { log_error, log } = require('../logs_.js');
 const { create_third_party_user } = require('../queries/user-control');
 ///user/////////////////////////////////////////////////
 uc.get("/login_available", async (req, res) => {
   try {
     res.json({ payload: true });
   } catch (error) {
-    log_error(error);
+    req.log_error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -35,7 +34,6 @@ uc.post('/login_by_third_party', async (req, res) => {
         third_party_login: 1
       }
       const ret = await create_third_party_user(newUserJson);
-      console.log("ret", ret);
       if (ret !== false) {
         if (ret.status === 1) {
           //success
@@ -55,7 +53,7 @@ uc.post('/login_by_third_party', async (req, res) => {
       } else throw new Error("register an new third party user failed.");
     } else throw new Error("user info invalid");
   } catch (error) {
-    log_error(error);
+    req.log_error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -66,14 +64,13 @@ uc.get('/logout', verifyUserLogin, async (req, res) => {
     req.session.save();
     res.json({ payload: "Successed logout." });
   } catch (error) {
-    log_error(error);
+    req.log_error(error);
     res.status(500).json({ "error": "error" });
   }
 });
 ///////////////////////////////////////////////////////
 function verifyUserLogin(req, res, next) {
   try {
-    // console.log("in verify user", req.session.userInfo)
     if (req.session.userInfo === undefined) {
       //new session, no login also
       throw new Error("You need to login first.");

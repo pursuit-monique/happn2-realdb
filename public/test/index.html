@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happn backend function demo</title>
+  <title>Happn front/ backend function demo</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <script type="module" defer>
     import srv from './fetch_.js';
@@ -12,7 +12,7 @@
     import { authByGoogle } from './auth.js';
     ///entry
     srv.checkLoginFunction((res) => {
-      console.log(res);
+      console.log("ping the server", res);
     })
 
     ///update buttons with event
@@ -38,6 +38,7 @@
       }
       evt.target.disabled = false;
     })
+    //event function
     const handleButtonClick = (name) => {
       console.log("clicked button name", name);
       switch (name) {
@@ -58,17 +59,10 @@
           break;
         ///event related///////////////////
         case "add an new happn/ event":
-          const imageFiles = document.querySelector("#new_happn_images").files;
+          let imageFiles = document.querySelector("#new_happn_images").files;
 
-          const formData = new FormData();
-          const imagesHash = [];
-          for (let file of imageFiles) {
-            const { hash, name, size, type, isUpload } = file;
-            imagesHash.push({ hash, name, size, type, isUpload });
-            if (file.isUpload) {
-              formData.append("files", file);
-            }
-          }
+          const { imagesHash, formData } = filesToHashArray(imageFiles);
+
           formData.append("happn", JSON.stringify({
             name: "test event name",
             description: "testing description",
@@ -84,6 +78,7 @@
             ]
           }));
           console.log("newHappn form data", formData);
+
           srv.newHappn(formData, res => {
             console.log("newHappn result", res);
           });
@@ -91,6 +86,7 @@
         case "view an happn/ event":
           const happnId = document.querySelector("#happn_id_input_for_viewing").value;
           console.log("requesting happn id", happnId);
+
           srv.getHappnById(happnId, res => {
             console.log("getHappnById result", res);
           })
@@ -98,11 +94,60 @@
         case "view a image by file hash":
           const imageEl = document.querySelector("#happn_detail_image_display");
           const fileHash = document.querySelector("#happn_detail_image_file_hash_input").value;
+
           imageEl.src = `${window.location.origin}/event_public_access/get_happn_image/${fileHash}`
           break;
+        case "update a happn with happn detail id":
+          const happn_detail_id = document.querySelector("#happn_detail_update_id_input").value;
+          const update_content = document.querySelector("#happn_detail_update_content_input").value;
+          const update_key = document.querySelector("#happn_detail_update_key_select").value;
+
+          srv.updateHappnDetail(happn_detail_id, { happn_detail: { [update_key]: update_content } }, res => {
+            console.log(res);
+          });
+          break;
+        case "replace detail images by id":
+          let imageFilesForReplace = document.querySelector("#replace_detail_images_file_input").files;
+          const happn_detail_id_for_replace = document.querySelector("#replace_detail_images_detail_id_input").value;
+
+          const { imagesHash: imagesHashForReplace, formData: formDataForReplace } = filesToHashArray(imageFilesForReplace);
+
+          formDataForReplace.append("detail_images_meta", JSON.stringify(imagesHashForReplace));
+
+          srv.replaceHappnDetailImages(happn_detail_id_for_replace, formDataForReplace, res => {
+            console.log("replaceHappnDetailImages", res);
+          });
+          break;
+        case "get Happen Detail By Ids": {
+          const ids = document.querySelector("#getHappenDetailByIds_input").value.split(",").map(el => el.trim());
+          console.log("get Happen Detail By Ids", ids);
+          srv.getHappnDetailByIds(ids, res => {
+            console.log(res);
+          });
+          break;
+        }
+        case "get the latest set of happen": {
+          const latest_happen_ol = document.querySelector("#latest_happen_ol");
+          console.log("dsa");
+
+          break;
+        }
+        default: { console.log("here is switch default") }
       }
     }
-    ///
+    //hepler functions/
+    function filesToHashArray(imageFiles) {
+      const formData = new FormData();
+      const imagesHash = [];
+      for (let file of imageFiles) {
+        const { hash, name, size, type, isUpload } = file;
+        imagesHash.push({ hash, name, size, type, isUpload });
+        if (file.isUpload) {
+          formData.append("files", file);
+        }
+      }
+      return { imagesHash, formData };
+    }
   </script>
   <style>
     ol>li {
@@ -133,22 +178,40 @@
           <button name="view an happn/ event">view an happn/ event</button>
           <input id="happn_id_input_for_viewing" type="text" value="5e9ba9d9-f000-49ce-b980-e9d663417c3d" />
         </li>
-        <li><button name="view a image by file hash">view a image by file hash</button> <input
+        <li><button name="view a image by file hash">view a image by file hash</button> happn detail id: <input
             id="happn_detail_image_file_hash_input" type="text"
             value="d7aeeba955999ad886bde0754c599e34679a7f1de7c4f0cb77301dcd06d304f9" />
           <img id="happn_detail_image_display" src="" alt="image for happn" />
         </li>
         <li>
-          <button>aaa</button>
-          <select>
-            <option>lat</option>
-            <option>lng</option>
-            <option>extra_info</option>
-            <option>status</option>
-            <option>start_time</option>
-            <option>end_time</option>
-            <option>description</option>
+          <button name="update a happn with happn detail id">update a happn with happn detail id</button>
+          happn detail id: <input id="happn_detail_update_id_input" type="text"
+            value="010a5b27-7d48-4dd8-aa0e-89811a303fc9" />
+          <select id="happn_detail_update_key_select">
+            <option value="lat">lat</option>
+            <option value="lng">lng</option>
+            <option value="extra_info">extra_info</option>
+            <option value="status">status</option>
+            <option value="start_time">start_time</option>
+            <option value="end_time">end_time</option>
+            <option value="description" selected>description</option>
           </select>
+          <input id="happn_detail_update_content_input" type="text" value="test description" />
+        </li>
+        <li>
+          <button name="replace detail images by id">replace detail images by id</button>
+          happn detail id: <input type="text" id="replace_detail_images_detail_id_input"
+            value="010a5b27-7d48-4dd8-aa0e-89811a303fc9" />
+          <input id="replace_detail_images_file_input" type="file" multiple accept="image/*" />
+        </li>
+        <li>
+          <button name="get Happen Detail By Ids">get Happen Detail By Ids</button>
+          <input type="text" id="getHappenDetailByIds_input"
+            value="23d25f79-de87-40af-9174-6ce0fb986bc2, 010a5b27-7d48-4dd8-aa0e-89811a303fc9" />
+        </li>
+        <li>
+          <button name="get the latest set of happen">get the latest set of happen</button>
+          <ol id="latest_happen_ol"></ol>
         </li>
       </ol>
     </div>
