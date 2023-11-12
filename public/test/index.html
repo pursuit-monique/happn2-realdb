@@ -120,16 +120,19 @@
           break;
         case "get Happen Detail By Ids": {
           const ids = document.querySelector("#getHappenDetailByIds_input").value.split(",").map(el => el.trim());
-          console.log(ids);
+          console.log("get Happen Detail By Ids", ids);
           srv.getHappnDetailByIds(ids, res => {
             console.log(res);
-          })
+          });
+          break;
         }
         case "get the latest set of happen": {
           const latest_happen_ol = document.querySelector("#latest_happen_ol");
+          console.log("dsa");
 
+          break;
         }
-        default: console.log("here is switch default")
+        default: { console.log("here is switch default") }
       }
     }
     //hepler functions/

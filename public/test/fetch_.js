@@ -107,6 +107,10 @@ function getHappnDetailByIds(ids, callback) {
   fetch_post(`${API}/event_public_access/get_happns_by_ids`, body, callback);
 }
 
+function getLaststHappnDetail(callback) {
+  fetch_get(`${API}/event_public_access/latest_happen_detail`, callback);
+}
+
 function checkImageExist(fileHash, callback) {
   fetch_get(`${API}/public_access/check_image_exist/${fileHash}`, res => {
     callback(res);
@@ -123,5 +127,6 @@ export default {
   replaceHappnDetailImages,
   getHappnById,
   checkImageExist,
-  getHappnDetailByIds
+  getHappnDetailByIds,
+  getLaststHappnDetail
 }

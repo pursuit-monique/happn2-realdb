@@ -1,7 +1,7 @@
 const express = require("express");
 const crypto = require('crypto');
 const uc = express.Router();
-const str_filter = require('../str_filter');
+const _str_filter_ = require('../_str_filter_');
 const { verifyIdToken } = require("../firebase_");
 const { create_third_party_user } = require('../queries/user-control');
 ///user/////////////////////////////////////////////////

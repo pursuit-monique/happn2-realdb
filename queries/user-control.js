@@ -1,6 +1,6 @@
 const db = require("../db/db-config");
 const crypto = require('crypto');
-const { log_error, performance_timer } = require('../logs_.js');
+const { log_error, performance_timer } = require('../_log_.js');
 
 /////////////////////////////////////////////////////////////////
 const create_third_party_user = async (user_json) => {

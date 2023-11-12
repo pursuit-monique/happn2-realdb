@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const multer = require("multer");
-const { processed_file_path, event_image_file_size_limit, event_json_size_limit, root_path, tmp_upload_file_path } = require('../variables_.js');
+const { processed_file_path, event_image_file_size_limit, event_json_size_limit, root_path, tmp_upload_file_path } = require('../_variables_.js');
 const upload = multer({
   dest: tmp_upload_file_path
 });
@@ -190,6 +190,15 @@ function process_upload_images_hash(file) {
   } catch (error) {
     req.log_error(error);
     return false;
+  }
+}
+///////////////////////////////////////////////////////
+function genenal_procedure(req, res, fn) {
+  try {
+
+  } catch (error) {
+    req.log_error(error);
+
   }
 }
 ///////////////////////////////////////////////////////

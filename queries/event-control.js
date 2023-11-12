@@ -1,6 +1,6 @@
 const db = require("../db/db-config");
-const { log, log_error, performance_timer } = require('../logs_.js');
-const { clean_up_uuid } = require('../str_filter');
+const { log, log_error, performance_timer } = require('../_log_.js');
+const { clean_up_uuid } = require('../_str_filter_.js');
 /**
  * 
   happen_detail status defination

@@ -1,7 +1,7 @@
 const express = require("express");
 const pa = express.Router();
-const { processed_file_path } = require('../variables_.js');
-const { user_input_letter_and_numbers_only } = require('../str_filter.js');
+const { processed_file_path } = require('../_variables_.js');
+const { user_input_letter_and_numbers_only } = require('../_str_filter_.js');
 const fs = require('fs');
 ///////////////////////////////////////////////////////
 pa.get("/", async (req, res) => {
