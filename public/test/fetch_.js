@@ -45,6 +45,9 @@ function fetch_post(url, fetchOptions, callback, method = 'POST') {
       callback(error);
     });
 }
+function fetch_put(url, fetchOptions, callback, method = 'PUT') {
+  fetch_post(url, fetchOptions, callback, method);
+}
 ///////////////////////////////////////////////
 const logout = (callback) => {
   //
@@ -76,11 +79,38 @@ function newHappn(formData, callback) {
     callback(res);
   });
 }
+function updateHappnDetail(happn_detail_id, jsonData, callback) {
+  fetch_put(
+    `${API}/event/update_detail/${happn_detail_id}`,
+    { body: JSON.stringify(jsonData) },
+    res => callback(res)
+  );
+}
+
+function replaceHappnDetailImages(happn_detail_id, formData, callback) {
+  const body = { body: formData, headers: { "Content-Type": "delete" }, };
+  fetch_put(
+    `${API}/event/replace_detail_images/${happn_detail_id}`,
+    body,
+    res => callback(res)
+  );
+}
+
 function getHappnById(happnId, callback) {
   fetch_get(`${API}/event_public_access/get_happn_by_id/${happnId}`, res => {
     callback(res);
   })
 }
+
+function getHappnDetailByIds(ids, callback) {
+  const body = { body: JSON.stringify(ids) }
+  fetch_post(`${API}/event_public_access/get_happns_by_ids`, body, callback);
+}
+
+function getLaststHappnDetail(callback) {
+  fetch_get(`${API}/event_public_access/latest_happen_detail`, callback);
+}
+
 function checkImageExist(fileHash, callback) {
   fetch_get(`${API}/public_access/check_image_exist/${fileHash}`, res => {
     callback(res);
@@ -93,6 +123,10 @@ export default {
   logout,
   //happn/event//////////
   newHappn,
+  updateHappnDetail,
+  replaceHappnDetailImages,
   getHappnById,
-  checkImageExist
+  checkImageExist,
+  getHappnDetailByIds,
+  getLaststHappnDetail
 }

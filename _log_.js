@@ -1,17 +1,17 @@
 var debug_mode = true;
-function log_error() {
-  console.error(...arguments);
-}
 
+function log_error() {
+  if (debug_mode) console.error(new Date().toLocaleString(), ...arguments);
+}
 function log() {
-  console.log(...arguments);
+  if (debug_mode) console.log(new Date().toLocaleString(), ...arguments);
 }
 
 class performance_timer {
-  constructor() {
+  constructor(init_str) {
     if (!debug_mode) return;
     this.start_time = process.uptime();
-    this.checkpoint = [];
+    this.checkpoint = [init_str];
   }
   add_tick(tick_name) {
     if (!debug_mode) return;
@@ -23,10 +23,11 @@ class performance_timer {
   done() {
     if (!debug_mode) return;
     this.add_tick("ending");
-    console.log(this.checkpoint);
+    log(this.checkpoint);
   }
 }
 function set_debug_mode(bool) {
   debug_mode = bool;
 }
+//////////////////////////////////////////////////
 module.exports = { log_error, log, performance_timer, set_debug_mode };
