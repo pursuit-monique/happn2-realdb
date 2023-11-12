@@ -37,8 +37,9 @@ ec.post('/new', upload.any(), async (req, res) => {
 
     //check the happn json's happnDetail's images with uploaded file
     happnJson.happnDetail.forEach((happn_detail, idx) => {
+      console.log(happn_detail.images)
       happn_detail.images.forEach((image, sub_idx) => {
-        if (imagesRet[image.hash] === undefined && image.isUpload === false) {
+        if (imagesRet[image.hash] === undefined && (image.isUpload === false) || image.isUpload === undefined) {
           //if the frontend said the file is exist on our end, check filehash
           if (!check_images_exist_by_hash(image.hash)) {
             throw new Error("uploaded file hash isn't match with uploaded JSON object.");
