@@ -12,16 +12,13 @@ const { create_new_event, update_happn_detail, replace_happn_detail_images } = r
 if (!fs.existsSync(processed_file_path)) fs.mkdirSync(processed_file_path);
 ///////////////////////////////////////////////////////
 ec.get("/", async (req, res) => {
-  try {
+  await req.genenal_procedure(req, res, async () => {
     res.json({ payload: "" });
-  } catch (error) {
-    req.log_error(error);
-    res.status(500).json({ error: error.message });
-  }
+  })
 });
 
 ec.post('/new', upload.any(), async (req, res) => {
-  try {
+  await req.genenal_procedure(req, res, async () => {
     //in this request, the header -> content-type should be "multipart/form-data;" 
     //json object
     const { happn } = req.body;
@@ -48,8 +45,9 @@ ec.post('/new', upload.any(), async (req, res) => {
           }
         } else if (imagesRet[image.hash]) {
           //if front end sent a file, move the file to images dir
+          console.log(imagesRet[image.hash]);
           fs.renameSync(
-            path.join(tmp_upload_file_path, path.parse(imagesRet[image.hash].path).base),
+            path.join(tmp_upload_file_path, path.basename(imagesRet[image.hash])),
             `${processed_file_path}${image.hash}`
           );
         } else {
@@ -64,14 +62,63 @@ ec.post('/new', upload.any(), async (req, res) => {
     const ret = await create_new_event(happnJson, req.session.userInfo.id);
     //return it to frondend
     res.json({ payload: ret });
-  } catch (error) {
-    req.log_error(error);
-    res.status(500).json({ error: error.message });
-    //remove all uploaded file if error
+  }, (error) => {
+    // on error remove all uploaded file 
     if (req.files?.length > 0) for (let file of req.files) {
-      if (file.path) fs.unlinkSync(path.join(tmp_upload_file_path, path.parse(file.path).base));
+      if (file.path) fs.unlinkSync(path.join(tmp_upload_file_path, path.basename(file.path)));
     }
-  }
+  })
+  // try {
+  //   //in this request, the header -> content-type should be "multipart/form-data;" 
+  //   //json object
+  //   const { happn } = req.body;
+  //   if (happn.length > event_json_size_limit) {
+  //     throw new Error(`JSON object over size.`);
+  //   }
+  //   const happnJson = JSON.parse(happn);
+
+  //   happnJson['creator'] = req.session.userInfo.id;
+  //   //files
+  //   const imagesRet = {};
+  //   if (req.files?.length > 0) for (let file of req.files) {
+  //     const ret = process_upload_images_hash(file);
+  //     if (ret) imagesRet[ret.file_hash] = file;
+  //   }
+
+  //   //check the happn json's happnDetail's images with uploaded file
+  //   happnJson.happnDetail.forEach((happn_detail, idx) => {
+  //     happn_detail.images.forEach((image, sub_idx) => {
+  //       if (imagesRet[image.hash] === undefined && image.isUpload === false) {
+  //         //if the frontend said the file is exist on our end, check filehash
+  //         if (!check_images_exist_by_hash(image.hash)) {
+  //           throw new Error("uploaded file hash isn't match with uploaded JSON object.");
+  //         }
+  //       } else if (imagesRet[image.hash]) {
+  //         //if front end sent a file, move the file to images dir
+  //         fs.renameSync(
+  //           path.join(tmp_upload_file_path, path.parse(imagesRet[image.hash].path).base),
+  //           `${processed_file_path}${image.hash}`
+  //         );
+  //       } else {
+  //         //else remove the temporary file
+  //         throw new Error("uploaded file unhandle situation.");
+  //       }
+
+  //     })
+  //   });
+  //   happnJson.imagesRet = imagesRet;
+  //   //insert into db
+  //   const ret = await create_new_event(happnJson, req.session.userInfo.id);
+  //   //return it to frondend
+  //   res.json({ payload: ret });
+  // } catch (error) {
+  //   req.log_error(error);
+  //   res.status(500).json({ error: error.message });
+  //   //remove all uploaded file if error
+  //   if (req.files?.length > 0) for (let file of req.files) {
+  //     if (file.path) fs.unlinkSync(path.join(tmp_upload_file_path, path.parse(file.path).base));
+  //   }
+  // }
 });
 
 ec.put('/update_detail/:happn_detail_id', async (req, res) => {

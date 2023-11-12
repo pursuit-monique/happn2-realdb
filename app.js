@@ -25,6 +25,7 @@ const user = require('./controllers/user-control.js').uc;
 const event = require('./controllers/event-control.js');
 const public_access = require('./controllers/public-access.js');
 const event_public_access = require('./controllers/public-event-control.js');
+const { type } = require("os");
 //common routing - login route//////////////////////////
 app.use('/webhook', github);
 app.use('/user', user);
@@ -41,7 +42,8 @@ app.get("*", (req, res) => {
   } else res.status(404).send(`<div style="height:100%;width:100%;display: flex;"><h1 style='margin:auto;'>404 [File not found]</h1></div><p style='position: absolute;bottom: 0;right: 0;margin-right: 3%'> by [Happn]. 2023 </p>`);
 });
 ///////////////////////////////////////////////////////
-async function genenal_procedure(req, res, fn) {
+async function genenal_procedure(req, res, fn, on_error = () => { }, on_finally = () => { }) {
+  // third argument is the main function entry, forth is error handling, fifth is when everything finished
   try {
     await fn();
   } catch (error) {
@@ -49,8 +51,9 @@ async function genenal_procedure(req, res, fn) {
     const message = error_message(error.message);
     const code = message !== error.message ? error.message : 500;
     res.status(Number(code)).json({ error: message });
+    if (typeof on_error === 'function') on_error();
   } finally {
-
+    if (typeof on_finally === 'function') on_finally();
   }
 }
 ////////////////////////////////////////////////
