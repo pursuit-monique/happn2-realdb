@@ -21,6 +21,6 @@
     "firebase-admin": "^11.10.1",
 
     "multer": "^1.4.5-lts.1",
-    "pg-promise": "^11.5.4"
+    "pg-promise": "^11.5.5"
   }
 }
